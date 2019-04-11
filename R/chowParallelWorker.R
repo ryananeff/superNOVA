@@ -1,9 +1,10 @@
-#' @title Worker thread for ddcorAllParallel (internal function).
-#' @description Runs the discovery of differential correlation (ddcor) section for comparing pairwise correlations across conditions in the Differential Gene Correlation Analysis (DGCA) package on a worker thread for two blocks of data (A and B).
+#' @title Worker thread for chowParallel (internal function).
+#' @description Runs chowCor between two or more subgroups of samples in the data versus the global model on a worker thread for two blocks of data (A and B).
 #' @param job A batchtools job instance.
 #' @param data A named list containing the program kwargs.
 #' @param instance Required by batchtools, but not used currently.
-#' @return Typically, the returned object is a data frame of the table of differential correlations between conditions. In the case that dCorAvg is calculated, the returned object is instead a list containing that table as well as the object summarizing the difference in average correlation for the specified portion of the data set.
+#' @return Results from running chowCor() on data block A and B. See chowCor() documentation for more information.
+#' @keywords superNOVA
 #' @export
 chowParallelWorker <- function(job,data,instance){
 
@@ -16,9 +17,6 @@ chowParallelWorker <- function(job,data,instance){
 	# n.cores
 	# batchWarningLevel
 	# libloc
-	
-	source("chowCor.R")
-	source("getQValue.R")
 	
 	options(warn=data$batchWarningLevel)
 

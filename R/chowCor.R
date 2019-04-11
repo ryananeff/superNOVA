@@ -1,31 +1,23 @@
-flattenChow = function(chow_result){
-  rownames = rownames(chow_result$corrs)
-  colnames = colnames(chow_result$corrs)
-  corrsflat = cbind(which(!is.na(chow_result$corrs),arr.ind = TRUE),na.omit(as.vector(chow_result$corrs)))
-  corrsflat[,1] = sapply(corrsflat[,1],function(x){rownames[as.numeric(x)]})
-  corrsflat[,2] = sapply(corrsflat[,2],function(x){colnames[as.numeric(x)]})
-  columns = c("GeneA","GeneB","groupCor","groupCorPval","pValDiff","Classes")
-  output = data.frame(matrix(NA,nrow=nrow(corrsflat),ncol=length(columns)))
-  output[,1:3] = corrsflat
-  output[,4] = na.omit(as.vector(chow_result$corrsP))
-  output[,5] = as.numeric(na.omit(as.vector(chow_result$pvalues)))
-  output[,6] = na.omit(as.vector(chow_result$classes))
-  colnames(output) = columns
-  output = output[output$GeneA!=output$GeneB,] #don't output self matching rows
-  output = output[order(output$pValDiff,method = "radix"),] #order the rows with most significant first
-  return(output)
-}
-
+#' @title Runs the superNOVA pipeline directly on one or two feature matrices.
+#' @description Evaluates differential coexpression between two or more subgroups of samples in the data versus the global model.
+#' @param design_mat A model.matrix type design matrix, denoting which samples are in which subgroups of the dataset. Required.
+#' @param matA A features (rows) by samples (columns) data.frame of feature values, such as a gene expression matrix. Required.
+#' @param matB A second features (rows) by samples (columns) data.frame of feature values, such as a gene expression matrix. Values in this matrix will be compared to matA if provided. Default=NULL.
+#' @param compare Which groups of samples in the design matrix should we evaluate? Otherwise, all groups in the design matrix will be evaluated. Default=NULL.
+#' @param corrType The base correlation metric to evaluate coexpression. One of "pearson","spearman", or "bicor". Default=pearson. 
+#' @return Returns a list of matrices, includes pvalues for the superNOVA test (pvalues) and their classes (classes), correlation values for each subgroup model (corrs) and their pvalues (corrsP), correlation values for the global model (globalCor) and its pvalues (globalCorP), and a flag to indicate whether a second matrix was used (secondMat). 
+#' @keywords superNOVA
+#' @export
 chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
   if(!is.null(matB)){secondMat=TRUE} else {secondMat=FALSE}
   if(!is.null(compare)){
     if(length(compare)<2){stop("number of groups to compare must be 2 or larger")}
     if(length(intersect(compare,colnames(design_mat)))<length(compare)){stop("group(s) to compare not in design matrix")}
     design_mat = design_mat[,compare]
-    design_mat = design_mat[rowSums(design_mat)>0,] #drop rows no longer relevant
-    matA = matA[,rownames(design_mat)]
-    matB = matB[,rownames(design_mat)]
   }
+  design_mat = design_mat[rowSums(design_mat)>0,] #drop rows no longer relevant
+  matA = matA[,rownames(design_mat)]
+  matB = matB[,rownames(design_mat)]
   if(secondMat){ #if we are comparing two matrices
     
     results_mat = matrix(NA,nrow=nrow(matA),ncol=nrow(matB))
@@ -37,6 +29,14 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
     colnames(corrs_mat) = rownames(matB) #gene2 names
     
     pvals_mat = matrix(NA,nrow=nrow(matA),ncol=nrow(matB))
+    rownames(pvals_mat) = rownames(matA) #gene1 names
+    colnames(pvals_mat) = rownames(matB) #gene2 names
+
+    global_corrs_mat = matrix(NA,nrow=nrow(matA),ncol=nrow(matB))
+    rownames(corrs_mat) = rownames(matA) #gene1 names
+    colnames(corrs_mat) = rownames(matB) #gene2 names
+    
+    global_pvals_mat = matrix(NA,nrow=nrow(matA),ncol=nrow(matB))
     rownames(pvals_mat) = rownames(matA) #gene1 names
     colnames(pvals_mat) = rownames(matB) #gene2 names
     
@@ -99,21 +99,27 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
       varB = varsB
       covsAB = cov(t(matAi),t(matB))
       if(corrType=="bicor"){
-      corrs = WGCNA::bicor(t(matAi),t(matB),use="all.obs")    
+        corrs = WGCNA::bicor(t(matAi),t(matB),use="all.obs")    
       } else {
-      corrs = WGCNA::cor(t(matAi),t(matB),use="all.obs",method=corrType)
+        corrs = WGCNA::cor(t(matAi),t(matB),use="all.obs",method=corrType)
       }
-      #sse_all = t(sapply(1:nrow(matB),function(x){ (varB[x]-covsAB[x]*(corrs[x]/sqrt(varA/varB[x])))*(ncol(matB)-1)}))
+
+      #corr test
+      deg_freedom = ncol(matAi)-2
+      in_pt = (abs(corrs) * sqrt(deg_freedom) / sqrt(1 - corrs^2))
+      corr_pvals = 2 * (1 - pt(in_pt, deg_freedom))
+
+      #chow test
       sse_all = (varB-covsAB*(corrs/sqrt(varA%*%(1/varB))))*(ncol(matB)-1)
-      
       df1 <- ncol(design_mat)
       df2 <- nrow(design_mat)-2*(df1)
-      
       f <- (sse_all-sse_groups)*df2/(df1*sse_groups)
       p <- pf(f, df1, df2, lower.tail=FALSE)
       
       corrs_mat[ix_row,] = apply(t(corrs_rg),1,paste,collapse="/")
       pvals_mat[ix_row,] = apply(t(pvals_rg),1,paste,collapse="/")
+      global_corrs_mat[ix_row,] = corrs
+      global_pvals_mat[ix_row,] = corr_pvals
       classes_mat[ix_row,] = apply(t(classes_rg),1,paste,collapse="/")
       results_mat[ix_row,] = p
     } #end row
@@ -129,6 +135,14 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
     colnames(corrs_mat) = rownames(matB) #gene2 names
     
     pvals_mat = matrix(NA,nrow=nrow(matA),ncol=nrow(matB))
+    rownames(pvals_mat) = rownames(matA) #gene1 names
+    colnames(pvals_mat) = rownames(matB) #gene2 names
+
+    global_corrs_mat = matrix(NA,nrow=nrow(matA),ncol=nrow(matB))
+    rownames(corrs_mat) = rownames(matA) #gene1 names
+    colnames(corrs_mat) = rownames(matB) #gene2 names
+    
+    global_pvals_mat = matrix(NA,nrow=nrow(matA),ncol=nrow(matB))
     rownames(pvals_mat) = rownames(matA) #gene1 names
     colnames(pvals_mat) = rownames(matB) #gene2 names
     
@@ -192,23 +206,33 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
       varB = varsB[ix_row:nrow(matB)]
       covsAB = cov(t(matAi),t(matBi))
       if(corrType=="bicor"){
-      corrs = WGCNA::bicor(t(matAi),t(matBi),use="all.obs")
+        corrs = WGCNA::bicor(t(matAi),t(matBi),use="all.obs")
       } else {
-      corrs = WGCNA::cor(t(matAi),t(matBi),use="all.obs",method=corrType)
+        corrs = WGCNA::cor(t(matAi),t(matBi),use="all.obs",method=corrType)
       }
+
+      #corr test
+      deg_freedom = ncol(matAi)-2
+      in_pt = (abs(corrs) * sqrt(deg_freedom) / sqrt(1 - corrs^2))
+      corr_pvals = 2 * (1 - pt(in_pt, deg_freedom))
+
+      #Chow test
       sse_all = (varB-covsAB*(corrs/sqrt(varA%*%(1/varB))))*(ncol(matB)-1)
       df1 <- ncol(design_mat)
       df2 <- nrow(design_mat)-2*(df1)
       f <- (sse_all-sse_groups)*df2/(df1*sse_groups)
       p <- pf(f, df1, df2, lower.tail=FALSE)
+
       corrs_mat[ix_row,ix_row:nrow(matB)] = apply(t(corrs_rg),1,paste,collapse="/")
       pvals_mat[ix_row,ix_row:nrow(matB)] = apply(t(pvals_rg),1,paste,collapse="/")
+      global_corrs_mat[ix_row,ix_row:nrow(matB)] = corrs
+      global_pvals_mat[ix_row,ix_row:nrow(matB)] = corr_pvals
       classes_mat[ix_row,ix_row:nrow(matB)] = apply(t(classes_rg),1,paste,collapse="/")
       results_mat[ix_row,ix_row:nrow(matB)] = p
       #list(classes=apply(t(classes_rg),1,paste,collapse="/"),pvalues=p)
     } #end row
   } #end else
   diag(results_mat) = 1
-  output = list(corrs=corrs_mat,corrsP=pvals_mat,pvalues=results_mat,classes=classes_mat,secondMat=secondMat)
+  output = list(corrs=corrs_mat,corrsP=pvals_mat,globalCor=global_corrs_mat,globalCorP=global_pvals_mat,pvalues=results_mat,classes=classes_mat,secondMat=secondMat)
   return(output)
 }

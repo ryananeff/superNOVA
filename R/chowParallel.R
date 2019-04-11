@@ -1,27 +1,13 @@
-#' @title Calls the DGCA pairwise pipeline, splitting input matrix into multiple batch jobs on an HPC.
-#' @description Runs the full discovery of differential correlation (ddcor) section for comparing pairwise correlations across conditions in the Differential Gene Correlation Analysis (DGCA) package.
+#' @title Calls the superNOVA pipeline, splitting input matrix into multiple batch jobs on an HPC.
+#' @description Evaluates differential coexpression between two or more subgroups of samples in the data versus the global model, using multiple nodes in parallel in a batch environment.
 #' @param inputMat The matrix (or data.frame) of values (e.g., gene expression values from an RNA-seq or microarray study) that you are interested in analyzing. The rownames of this matrix should correspond to the identifiers whose correlations and differential correlations you are interested in analyzing, while the columns should correspond to the rows of the design matrix and should be separable into your compare.
 #' @param design A standard model.matrix created design matrix. Rows correspond to samples and colnames refer to the names of the conditions that you are interested in analyzing. Only 0's or 1's are allowed in the design matrix. Please see vignettes for more information.
 #' @param compare Vector of two character strings, each corresponding to one group name in the design matrix, that should be compared.
-#' @param outputFile Location to save the output. This is necessary when the number of comparisons >= 2^31-1. Required.
+#' @param outputFile Location to save the output. Required.
 #' @param sigOutput Should we save the significant results in a separate file? Default = FALSE.
-#' @param impute A binary variable specifying whether values should be imputed if there are missing values. Note that the imputation is performed in the full input matrix (i.e., prior to subsetting) and uses k-nearest neighbors.
-#' @param corrType The correlation type of the analysis, limited to "pearson" or "spearman". Default = "pearson".
-#' @param nPairs Either a number, specifying the number of top differentially correlated identifier pairs to display in the resulting table, or a the string "all" specifying that all of the pairs should be returned. If splitSet is specified, this is reset to the number of non-splitSet identifiers in the input matrix, and therefore will not be evaluated.
-#' @param sortBy Character string specifying the way by which you'd like to sort the resulting table. This will happen at the system shell level (requires a UNIX shell).
-#' @param adjust Allows for resulting p-values to be corrected for multiple hypothesis tests, optional. Some non-default choices require the "fdrtool" package or the "qvalue". Default = "none", which means that no p-value adjustment is performed. Other options include "perm" to use permutation samples, methods in ?p.adjust (i.e., "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr"), and methods in ?fdrtool (i.e., "fndr", "pct0", "locfdr").
-#' @param nPerms Number of permutations to generate. If NULL, permutation testing will not be performed. Default = "10".
-#' @param classify Binary value specifying whether the correlation values in each condition and differential correlation scores should be used to classifying the resulting identifiers into compare. Default = TRUE
-#' @param sigThresh If classify = TRUE, this numeric value specifies the p-value threshold at which a differential correlation p-value is deemed significant for differential correlation class calculation. Default = 1, as investigators may use different cutoff thresholds; however, this can be lowered to establish significant classes as desired.
-#' @param corSigThresh If classify = TRUE, this numeric value specifies the p-value threshold at which a correlation p-value is deemed significant. Default = 0.05.
-#' @param corPower The power to raise the correlations to before plotting the classic heatmap. Larger correlation powers emphasize larger correlation values relatively more compared to smaller correlation values.
+#' @param corrType The correlation type of the analysis, limited to "pearson","spearman",or "bicor". Default = "pearson".
+#' @param sigThresh This numeric value specifies the p-value threshold at which a differential correlation p-value is deemed significant for differential correlation class calculation. Default = 1, as investigators may use different cutoff thresholds; however, this can be lowered to establish significant classes as desired.
 #' @param verbose Option indicating whether the program should give more frequent updates about its operations. Default = FALSE.
-#' @param corr_cutoff Cutoff specifying correlation values beyond which will be truncated to this value, to reduce the effect of outlier correlation values when using small sample sizes. Note that this does NOT affect the underlying correlation values, but does affect the z-score difference of correlation calculation in the dcTopPairs table. Default = 0.99
-#' @param getDCorAvg Logical, specifying whether the average difference in correlation between compare should be calculated. Default = FALSE
-#' @param dCorAvgType Character vector specifying the type of average differential correlation calculation that should be performed. Only evaluated if dCorAge is TRUE. Types = c("gene_average", "total_average", "both"). gene_average calculates whether each genes' differential correlation with all others is more than expected via permutation samples (and empirical FDR adjustment, in the case of > 1 gene), while total_average calculates whether the total average differential correlation is higher than expected via permutation samples. "both" performs both of these. If splitSet is specified, then only genes in the splitSet have their average gene differential correlation calculated if gene_average is chosen.
-#' @param dCorAvgMethod Character vector specifying the method for calculating the "average" differential correlation calculation that should be used. Options = "median", "mean".
-#' @param signType Coerce all correlation coefficients to be either positive (via "positive"), negative (via "negative"), or none (via "none") prior to calculating differential correlation. This could be used if, e.g., you think that going from a positive to a negative correlation is unlikely to occur biologically and is more likely to be due to noise, and you want to ignore these effects. Note that this does NOT affect the reported underlying correlation values, but does affect the z-score difference of correlation calculation. Default = "none", for no coercing.
-#' @param oneSidedPVal If the dCorAvgType test is total_average, this option specifies whether a one-sided p-value should be reported, as opposed to a two-sided p-value. That is, if the average difference of z-scores is greater than zero, test whether the permutation average difference of z-scores are less than that average to get the p-value, and vice versa for the case that the average difference of z-scores is less than 0. Otherwise, test whether the absolute value of the average difference in z-scores is greater than the absolute values of the permutation average difference in z-scores. Default = FALSE.
 #' @param perBatch Number of times to split the features of the input data into separate batches. A higher number creates a larger number of jobs, but may be less uniform. Default = 10.
 #' @param coresPerJob Number of cores to use on each batch job run. Default = 2.
 #' @param timePerJob Walltime to request for each batch job (e.g. in a HPC cluster), in minutes. Default = 60
@@ -32,31 +18,15 @@
 #' @param batchSeed Random seed to use on all batch jobs. Default = 12345.
 #' @param maxRetries Number of times to re-submit jobs that failed. This is helpful for jobs that failed due to transient errors on an HPC. Default = 3
 #' @param testJob Test one job before running it? Default = FALSE
-#' @param k When running in MI mode, the number of intervals to discretize the data into before calculating mutual information. Default = 5.
-#' @param k_iter_max When running in MI mode, the number of iterations to determine the k-clusters for discretization before calculating mutual information. Default = 10. 
 #' @param chunkSize Execute multiple splits sequentially on each node. Default = 1 (false)
 #' @return Returns whether all jobs successfully executed or not. Output is in the output file.
+#' @keywords superNOVA
 #' @export
-
-#split = 50	##perBatch				
-#nPerms = 15 ##nPerms															
-#coresPerJob = 2	#coresPerJob															
-#outputfile = "/sc/orga/projects/zhangb03a/lei_guo/DGCA_gene_CNV/gene_cnv_dgca_f.ad-m.ad_bm36.batchtools.txt" #outputFile
-#inputMat = expr_f.ad_m.ad #input dataframe
-#design = design_sex.ad #input design matrix									
-#compare = c("F.AD", "M.AD")	##compare													
-#corrType="spearman"	##corrType
-
-#walltime = 80 	##timePerJob
-#memory = 2500	##memPerJob
-
-source("chowParallelWorker.R")
-
 chowParallel <- function(inputMat, design, outputFile, compare=NULL,
-    sigOutput = FALSE, sigThresh = 1, verbose = FALSE, corrType="pearson",
+    sigOutput = FALSE, sigThresh = 0.05, verbose = FALSE, corrType="pearson",
 	perBatch = 10, coresPerJob = 2, timePerJob = 60, memPerJob = 2000, 
-	batchConfig = system.file("config/batchConfig_Zhang.R",package="DGCA"), batchDir = "batchRegistry",
-	batchWarningLevel = 0, batchSeed = 12345, maxRetries = 3, testJob=FALSE, k=5,k_iter_max=10, chunkSize=1){
+	batchConfig = system.file("config/batchConfig_Zhang.R",package="superNOVA"), batchDir = "batchRegistry",
+	batchWarningLevel = 0, batchSeed = 12345, maxRetries = 3, testJob=FALSE,chunkSize=1){
 
 	## REMOVED PARAMETERS 
 	
@@ -198,13 +168,13 @@ chowParallel <- function(inputMat, design, outputFile, compare=NULL,
 	   if (i==1){
 		   utils::write.table(result,file = outputFile,sep = "\t",col.names = T,row.names=F,quote=F) #write sequentially to file, create file
 		   if(sigOutput){
-			   utils::write.table(result[result[,"pValDiff"]<=0.05,],file = paste0(outputFile,".signif.txt"),
+			   utils::write.table(result[result[,"pValDiff"]<=sigThresh,],file = paste0(outputFile,".signif.txt"),
 			               sep = "\t",col.names = T,row.names=F,quote=F)
 		   }
 	   } else {
 		   utils::write.table(result,file = outputFile,append = T, sep = "\t",col.names = F,row.names=F,quote=F) #write sequentially to file, append to file already made
 		   if(sigOutput){
-			   utils::write.table(result[result[,"pValDiff"]<=0.05,],file = paste0(outputFile,".signif.txt"),
+			   utils::write.table(result[result[,"pValDiff"]<=sigThresh,],file = paste0(outputFile,".signif.txt"),
 			               append = T, sep = "\t",col.names = F,row.names=F,quote=F)
 		   }
 	   }
