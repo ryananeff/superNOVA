@@ -17,7 +17,7 @@ chowParallelWorker <- function(job,data,instance){
 	# n.cores
 	# batchWarningLevel
 	# libloc
-	
+
 	options(warn=data$batchWarningLevel)
 
 	cl<-parallel::makeCluster(data$n.cores)

@@ -21,17 +21,20 @@
 #' @param chunkSize Execute multiple splits sequentially on each node. Default = 1 (false)
 #' @return Returns whether all jobs successfully executed or not. Output is in the output file.
 #' @keywords superNOVA
+#' @importFrom utils head
+#' @import data.table
 #' @export
+
 chowParallel <- function(inputMat, design, outputFile, compare=NULL,
     sigOutput = FALSE, sigThresh = 0.05, verbose = FALSE, corrType="pearson",
-	perBatch = 10, coresPerJob = 2, timePerJob = 60, memPerJob = 2000, 
+	perBatch = 10, coresPerJob = 2, timePerJob = 60, memPerJob = 2000,
 	batchConfig = system.file("config/batchConfig_Zhang.R",package="superNOVA"), batchDir = "batchRegistry",
 	batchWarningLevel = 0, batchSeed = 12345, maxRetries = 3, testJob=FALSE,chunkSize=1){
 
-	## REMOVED PARAMETERS 
-	
+	## REMOVED PARAMETERS
+
 	plotFdr = FALSE # must be false because batch jobs would make multiple. not implemented yet.
-	splitSet = NULL # not implemented. 
+	splitSet = NULL # not implemented.
 	inputMatB = NULL # we use this to submit batch jobs, so not implemented yet
 	heatmapPlot = FALSE # must be false because batch jobs would make multiple. not implemented yet.
 	customize_heatmap = FALSE # must be false because batch jobs would make multiple. not implemented yet.
@@ -104,7 +107,7 @@ chowParallel <- function(inputMat, design, outputFile, compare=NULL,
 	    startBs = c(startBs,startB)
 	    endAs = c(endAs,endA)
 	    endBs = c(endBs,endB)
-	  } 
+	  }
 	}
 	pdes = list(input_data=data.table::data.table(startA=startAs,endA=endAs,startB=startBs,endB=endBs))
 	batchtools::addExperiments(pdes) #add the problem x algorithm here
@@ -122,7 +125,7 @@ chowParallel <- function(inputMat, design, outputFile, compare=NULL,
     ids = batchtools::findExperiments(algo.name = "chow")
     ids = ids[, chunk := batchtools::chunk(job.id, chunk.size = chunkSize)] #chunk size
 	batchtools::submitJobs(ids=ids, resources=res)
-	
+
 	message("Waiting for jobs to complete...")
 	message(Sys.time())
 	job_retries = sapply(batchtools::findJobs()$job.id, function(x) {0})

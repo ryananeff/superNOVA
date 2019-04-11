@@ -1,10 +1,16 @@
 Package: superNOVA
-Title: What the Package Does (one line, title case)
-Version: 0.0.0.9000
-Authors@R: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+Title: Differential coexpression within multiple subgroups of data
+Version: 0.0.0.9001
+Authors@R: person("Ryan", "Neff", email = "ryan.neff@icahn.mssm.edu", role = c("aut", "cre"))
+Description: Calculates differential coexpression of multiple feature pairs between two  or more subgroups of samples, using an ANOVA test for multiple correlations versus a global correlation.  This test is based on the Chow statistic, which uses the sum of squared residuals between correlation submodels and a global model of correlation between each feature pair. Useful for determining which genes and gene pairs have been perturbed in gene expression experiments across clinically or biologically relevant subgroups in a  large population of samples, such as subtypes of health and disease. Also useful for determining differences  between a global gene coexpression network edges and subgroup-specific gene coexpression networks. Can rapidly  scale to >billions of feature pairs using both a multicore and multinode parallelization scheme, enabling  multi-omic feature pair comparisons for millions of input features.
 Depends: R (>= 3.4.3)
-License: What license is it under?
+Imports: 
+  WGCNA (>= 1.6.3), 
+  batchtools (>= 0.9.11), 
+  data.table (>= 1.12.0), 
+  doParallel (>= 1.0.14), 
+  qvalue (>= 2.10.0)
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1.9000

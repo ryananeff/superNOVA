@@ -10,7 +10,7 @@ flattenChow(chow_result)
 \item{chow_result}{A list of matrices as output by chowCor. Required}
 }
 \value{
-Returns a data.frame, sorted by superNOVA p-value, where each row is a feature pair, with columns "GeneA","GeneB","groupCor","groupCorPval","globalCor","globalCorP","pValDiff","Classes".
+Returns a data.frame, sorted by superNOVA p-value, where each row is a feature pair, with columns "Gene1","Gene2","groupCor","groupCorPval","globalCor","globalCorP","pValDiff","Classes".
 }
 \description{
 Takes in results from chowCor as a list of 2d matrices and converts it into a single data.frame, where the first two columns are an edgelist of all pairs compared.
