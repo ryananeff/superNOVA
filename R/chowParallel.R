@@ -55,8 +55,8 @@ chowParallel <- function(inputMat, design, outputFile, compare=NULL,
 	res = list(measure.memory = TRUE,walltime=timePerJob,memory=memPerJob,cores=coresPerJob,chunks.as.array.jobs = TRUE)
 
 	matrix_part <- function(job,data,startA, endA, startB, endB){
-	    blockA = data$input[startA:endA,] #get first chunk of genes to compare
-	    blockB = data$input[startB:endB,] #get second chunk of genes to compare
+	    blockA = data$input[startA:endA,,drop=FALSE] #get first chunk of genes to compare
+	    blockB = data$input[startB:endB,,drop=FALSE] #get second chunk of genes to compare
 		nPairs = (nrow(blockA)*nrow(blockA)-nrow(blockA))/2+(nrow(blockB)*nrow(blockB)-nrow(blockB))/2
 		list(matA=blockA, matB=blockB, nPairs=nPairs) #problem
 	}
