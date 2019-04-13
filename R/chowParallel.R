@@ -14,7 +14,7 @@
 #' @param memPerJob Memory to request for each batch job (e.g. in a HPC cluster), in MB. Default = 2000
 #' @param batchConfig Location of the batchtools configuration file (e.g. to configure this tool to work with your HPC cluster). Defaults to one used at inst/config/batchConfig_Zhang.R.
 #' @param batchDir Location to store temporary files, logs, and results of the batch run. This is the registry for the batchtools R package. Default = batchRegistry/
-#' @param batchWarningLevel Warning level on remote nodes during DGCA calculation (equivalent to setting options(warn=batchWarningLevel). Default = 0.
+#' @param batchWarningLevel Warning level on remote nodes during chowCor calculation (equivalent to setting options(warn=batchWarningLevel). Default = 0.
 #' @param batchSeed Random seed to use on all batch jobs. Default = 12345.
 #' @param maxRetries Number of times to re-submit jobs that failed. This is helpful for jobs that failed due to transient errors on an HPC. Default = 3
 #' @param testJob Test one job before running it? Default = FALSE
@@ -61,7 +61,7 @@ chowParallel <- function(inputMat, design, outputFile, compare=NULL,
 		list(matA=blockA, matB=blockB, nPairs=nPairs) #problem
 	}
 
-	batchtools::addAlgorithm(name="chow",fun=chowParallelWorker,reg=reg)
+	batchtools::addAlgorithm(name="chow",fun=superNOVA::chowParallelWorker,reg=reg)
 	batchtools::addProblem(name="input_data",fun=matrix_part,reg=reg,
 	                       data = list(input=inputMat, compare=compare,design=design,
 	                         n.cores=coresPerJob,corrType=corrType,
