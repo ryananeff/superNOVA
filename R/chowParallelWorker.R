@@ -25,10 +25,9 @@ chowParallelWorker <- function(job,data,instance){
 
 	set.seed(data$seed) #random seed for reproducibility
 
-	if(data$verbose){
-		cat("Starting run now...\n")
-		cat(paste0(Sys.time(),"\n"))
-	}
+
+	cat("Starting run now...\n")
+	cat(paste0(Sys.time(),"\n"))
 	if(rownames(instance$matA)==rownames(instance$matB)){
 		chow_result = superNOVA::chowCor(design_mat=data$design,matA=t(instance$matA), matB=NULL, compare = data$compare,
 		                      corrType=data$corrType)
