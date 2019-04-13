@@ -17,12 +17,13 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
     design_mat = design_mat[,compare]
   }
   design_mat = design_mat[rowSums(design_mat)>0,] #drop rows no longer relevant
-  if(nrow(matA)==nrow(design_mat)){
+  if(ncol(matA)!=nrow(design_mat)){
     matA = t(matA)
     matB = t(matB)
   }
   matA_out <<- matA
   matB_out <<- matB
+  design_mat_out <<- design_mat
   #tryCatch({
   print(rownames(design_mat)==colnames(matA))
   print(rownames(design_mat)==colnames(matB))
