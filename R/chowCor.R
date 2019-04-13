@@ -20,6 +20,8 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
   #tryCatch({
     print(rownames(design_mat)==colnames(matA))
     print(rownames(design_mat)==colnames(matB))
+    print(colnames(matA))
+    print(rownames(design_mat))
     matA = matA[,rownames(design_mat),drop=FALSE]
     matB = matB[,rownames(design_mat),drop=FALSE]
     #},error=function(e){
