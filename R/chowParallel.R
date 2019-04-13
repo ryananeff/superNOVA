@@ -122,8 +122,7 @@ chowParallel <- function(inputMat, design, outputFile, compare=NULL,
 
 	message("Submitting jobs to cluster...")
 	message(Sys.time())
-    ids = batchtools::findExperiments()
-    ids = ids[, chunk := batchtools::chunk(job.id, chunk.size = chunkSize)] #chunk size
+  ids = batchtools::findExperiments()
 	batchtools::submitJobs(ids=ids, resources=res)
 
 	message("Waiting for jobs to complete...")
