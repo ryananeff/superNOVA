@@ -31,16 +31,6 @@ chowParallel <- function(inputMat, design, outputFile, compare=NULL,
 	batchConfig = system.file("config/batchConfig_Zhang.R",package="superNOVA"), batchDir = "batchRegistry",
 	batchWarningLevel = 0, batchSeed = 12345, maxRetries = 3, testJob=FALSE,chunkSize=1){
 
-	## REMOVED PARAMETERS
-
-	plotFdr = FALSE # must be false because batch jobs would make multiple. not implemented yet.
-	splitSet = NULL # not implemented.
-	inputMatB = NULL # we use this to submit batch jobs, so not implemented yet
-	heatmapPlot = FALSE # must be false because batch jobs would make multiple. not implemented yet.
-	customize_heatmap = FALSE # must be false because batch jobs would make multiple. not implemented yet.
-	color_palette = NULL # must be null because batch jobs would make multiple. not implemented yet.
-	heatmapClassic = FALSE # must be false because batch jobs would make multiple. not implemented yet.
-
 	#######
 	if(verbose){
 		message("Creating batch job registry (will overwrite previous registry at same location)")
@@ -55,9 +45,8 @@ chowParallel <- function(inputMat, design, outputFile, compare=NULL,
 	res = list(measure.memory = TRUE,walltime=timePerJob,memory=memPerJob,cores=coresPerJob,chunks.as.array.jobs = TRUE)
 
 	matrix_part <- function(job,data,startA, endA, startB, endB){
-	    blockA = data$input[startA:endA,,drop=FALSE] #get first chunk of genes to compare
-	    blockB = data$input[startB:endB,,drop=FALSE] #get second chunk of genes to compare
-		nPairs = (nrow(blockA)*nrow(blockA)-nrow(blockA))/2+(nrow(blockB)*nrow(blockB)-nrow(blockB))/2
+	    blockA = t(data$input[startA:endA,,drop=FALSE]) #get first chunk of genes to compare
+	    blockB = t(data$input[startB:endB,,drop=FALSE]) #get second chunk of genes to compare
 		list(matA=blockA, matB=blockB, nPairs=nPairs) #problem
 	}
 
