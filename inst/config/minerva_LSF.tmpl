@@ -24,4 +24,4 @@ export DEBUGME=<%= Sys.getenv("DEBUGME") %>
 <%= sprintf("export OPENBLAS_NUM_THREADS=%i", resources$blas.threads) -%>
 <%= sprintf("export MKL_NUM_THREADS=%i", resources$blas.threads) -%>
 
-Rscript -e '.libPaths("~/.RlibDGCA"); batchtools::doJobCollection("<%= uri %>")'
+Rscript -e '.libPaths("<%= resources$libpath %>"); batchtools::doJobCollection("<%= uri %>")'
