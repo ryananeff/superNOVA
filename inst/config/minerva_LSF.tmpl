@@ -1,17 +1,17 @@
 #!/bin/bash
 
 ## Template for R jobs submitted via bsub by batchtools to the LSF at Mount Sinai Hospital (Minerva HPC).
-## For configuration instructions and examples, see the batchtools R package reference on CRAN. 
+## For configuration instructions and examples, see the batchtools R package reference on CRAN.
 ## Also read the Minerva HPC documentation available at hpc.mssm.edu for configuration instructions for bsub.
 
-# Default resources can be set in your .BatchJobs.R by defining the variable 
+# Default resources can be set in your .BatchJobs.R by defining the variable
 ## 'default.resources' as a named list.
 ## Arrayjobs currently not implemented by batchtools package for LSF.
 
 #BSUB -J <%= job.name %>        					 # name of the job / array jobs
 #BSUB -o <%= log.file %>                             # output is sent to logfile, stdout + stderr by default
 #BSUB -P <%= resources$project %>                    # project name (acc_zhangb03a)
-#BSUB -q <%= resources$queue %>                      # queue to submit to 
+#BSUB -q <%= resources$queue %>                      # queue to submit to
 #BSUB -W <%= resources$walltime %>                   # Walltime in minutes
 #BSUB -n <%= resources$cores %>                      # number of cores to be used by the job
 #BSUB -R "rusage[mem=<%= resources$memory %>]"       # Memory requirements per core in Mbytes
@@ -24,4 +24,4 @@ export DEBUGME=<%= Sys.getenv("DEBUGME") %>
 <%= sprintf("export OPENBLAS_NUM_THREADS=%i", resources$blas.threads) -%>
 <%= sprintf("export MKL_NUM_THREADS=%i", resources$blas.threads) -%>
 
-Rscript -e '.libPaths("~/.RlibDGCA"); library(arules); batchtools::doJobCollection("<%= uri %>")'
+Rscript -e '.libPaths("~/.RlibDGCA"); batchtools::doJobCollection("<%= uri %>")'
