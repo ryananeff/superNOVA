@@ -238,6 +238,8 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
     } #end row
   } #end else
   diag(results_mat) = 1
-  output = list(corrs=corrs_mat,corrsP=pvals_mat,globalCor=global_corrs_mat,globalCorP=global_pvals_mat,pvalues=results_mat,classes=classes_mat,secondMat=secondMat)
+  output = list(corrs=corrs_mat,corrsP=pvals_mat,globalCor=global_corrs_mat,
+                globalCorP=global_pvals_mat,pvalues=results_mat,classes=classes_mat,
+                secondMat=secondMat,groups_compared=paste(colnames(design_mat),collapse="/"))
   return(output)
 }

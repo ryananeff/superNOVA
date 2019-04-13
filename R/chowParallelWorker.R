@@ -37,12 +37,6 @@ chowParallelWorker <- function(job,data,instance){
 		                      corrType=data$corrType)
 	}
 	ddcor_res = flattenChow(chow_result)
-	#recalculate the q-values two ways
-	if(data$verbose){
-		message("calculating qvalues now.")
-		cat(paste0(Sys.time(),"\n"))
-	}
-	ddcor_res[,"qValDiff"]=as.matrix(getQValue(ddcor_res$pValDiff)$qvalues)
 	if(data$verbose){
 		cat("Completed run\n")
 		cat(paste0(Sys.time(),"\n"))
