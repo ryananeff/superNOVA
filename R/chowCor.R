@@ -18,9 +18,8 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
   }
   design_mat = design_mat[rowSums(design_mat)>0,] #drop rows no longer relevant
   #tryCatch({
-    print(head(design_mat))
-    print(head(matA))
-    print(head(matB))
+    print(rownames(design_mat)==colnames(matA))
+    print(rownames(design_mat)==colnames(matB))
     matA = matA[,rownames(design_mat),drop=FALSE]
     matB = matB[,rownames(design_mat),drop=FALSE]
     #},error=function(e){
