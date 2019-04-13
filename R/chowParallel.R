@@ -47,7 +47,7 @@ chowParallel <- function(inputMat, design, outputFile, compare=NULL,
 	matrix_part <- function(job,data,startA, endA, startB, endB){
 	    blockA = t(data$input[startA:endA,,drop=FALSE]) #get first chunk of genes to compare
 	    blockB = t(data$input[startB:endB,,drop=FALSE]) #get second chunk of genes to compare
-		list(matA=blockA, matB=blockB, nPairs=nPairs) #problem
+		list(matA=blockA, matB=blockB) #problem
 	}
 
 	batchtools::addAlgorithm(name="chow",fun=superNOVA::chowParallelWorker,reg=reg)
