@@ -30,13 +30,13 @@ chowParallelWorker <- function(job,data,instance){
 		cat(paste0(Sys.time(),"\n"))
 	}
 	if(rownames(instance$matA)==rownames(instance$matB)){
-		chow_result = chowCor(design_mat=data$design,matA=instance$matA, matB=NULL, compare = data$compare,
+		chow_result = superNOVA::chowCor(design_mat=data$design,matA=instance$matA, matB=NULL, compare = data$compare,
 		                      corrType=data$corrType)
 	}else{
-		chow_result = chowCor(design_mat=data$design,matA=instance$matA, matB=instance$matB, compare = data$compare,
+		chow_result = superNOVA::chowCor(design_mat=data$design,matA=instance$matA, matB=instance$matB, compare = data$compare,
 		                      corrType=data$corrType)
 	}
-	ddcor_res = flattenChow(chow_result)
+	ddcor_res = superNOVA::flattenChow(chow_result)
 	if(data$verbose){
 		cat("Completed run\n")
 		cat(paste0(Sys.time(),"\n"))
