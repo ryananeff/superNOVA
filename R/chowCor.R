@@ -17,12 +17,12 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
     design_mat = design_mat[,compare]
   }
   design_mat = design_mat[rowSums(design_mat)>0,] #drop rows no longer relevant
-  tryCatch({
+  #tryCatch({
     matA = matA[,rownames(design_mat),drop=FALSE]
     matB = matB[,rownames(design_mat),drop=FALSE]
-    },error=function(e){
-      stop("Row names in design matrix do not match column names in input.")
-    })
+    #},error=function(e){
+    #  stop("Row names in design matrix do not match column names in input.")
+    #})
   if(secondMat){ #if we are comparing two matrices
 
     results_mat = matrix(NA,nrow=nrow(matA),ncol=nrow(matB))
