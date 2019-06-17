@@ -5,6 +5,8 @@
 #' @param diffCor_cutoff The p-value at which to consider a subgroup-specific model versus a global model. Default = 0.05.
 #' @param corPval_cutoff The p-value at which to consider an edge to have significant correlation between genes versus no correlation. Default = 0.05.
 #' @param bufflen The number of buffer rows for reading the input file, increasing this will speed up the computation at the expense of memory. Default = 10000.
+#' @keywords superNOVA hybrid
+#' @return None (output to files)
 #' @export
 hybridCorMat <- function(input_file, output_file_prefix, diffCor_cutoff = 0.05, corPval_cutoff = 0.05, bufflen = 10000){
 
@@ -31,7 +33,7 @@ hybridCorMat <- function(input_file, output_file_prefix, diffCor_cutoff = 0.05, 
         for(ix in 1:length(subtypes)){
           subtype = subtypes[ix]
           filen = paste0(output_file_prefix,subtype,".ijw.tsv")
-          con = file(filen,"wt")
+          con = file(filen,"wt", blocking=F)
           subtype_files[[ix]] = con
         }
         need_subtypes = FALSE
