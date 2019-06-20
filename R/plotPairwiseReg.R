@@ -9,16 +9,22 @@
 #' @export
 plotPairwiseReg <- function(geneA, geneB, datExpr,design_mat){
 
-  x = datExpr[geneA,]
-  y = datExpr[geneB,]
+  x = as.numeric(datExpr[geneA,])
+  y = as.numeric(datExpr[geneB,])
 
-  cols = sample(grDevices::rainbow(length(colnames(design_mat))))
+  cols = grDevices::rainbow(length(colnames(design_mat)))
+  cols_translate = setNames(cols,colnames(design_mat))
+  cols_design = rep(NA,length(design_mat))
+  for(group in colnames(design_mat)){
+    cols_design[design_mat[,group]==1] = cols_translate[group]
+  }
 
-  plot(x,y,main="Regression models",xlab = geneA,ylab=geneB,col=cols_design)
+  plot(x,y,main="Regression models",xlab=geneA,ylab=geneB,col=cols_design)
 
   for(group in 1:ncol(design_mat)){
-    x = datExpr[geneA,design_mat[,group]==1]
-    y = datExpr[geneB,design_mat[,group]==1]
+    x = as.numeric(datExpr[geneA,design_mat[,group]==1])
+    y = as.numeric(datExpr[geneB,design_mat[,group]==1])
     abline(lm(y ~ x),col=cols[group])
   }
+  legend("topleft",legend=colnames(design_mat),col=cols,lty=1)
 }

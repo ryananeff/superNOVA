@@ -33,17 +33,25 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
     rownames(corrs_mat) = rownames(matA) #gene1 names
     colnames(corrs_mat) = rownames(matB) #gene2 names
 
+    slopes_mat = matrix(NA,nrow=nrow(matA),ncol=nrow(matB))
+    rownames(slopes_mat) = rownames(matA) #gene1 names
+    colnames(slopes_mat) = rownames(matB) #gene2 names
+
     pvals_mat = matrix(NA,nrow=nrow(matA),ncol=nrow(matB))
     rownames(pvals_mat) = rownames(matA) #gene1 names
     colnames(pvals_mat) = rownames(matB) #gene2 names
 
     global_corrs_mat = matrix(NA,nrow=nrow(matA),ncol=nrow(matB))
-    rownames(corrs_mat) = rownames(matA) #gene1 names
-    colnames(corrs_mat) = rownames(matB) #gene2 names
+    rownames(global_corrs_mat) = rownames(matA) #gene1 names
+    colnames(global_corrs_mat) = rownames(matB) #gene2 names
+
+    global_slopes_mat = matrix(NA,nrow=nrow(matA),ncol=nrow(matB))
+    rownames(global_slopes_mat) = rownames(matA) #gene1 names
+    colnames(global_slopes_mat) = rownames(matB) #gene2 names
 
     global_pvals_mat = matrix(NA,nrow=nrow(matA),ncol=nrow(matB))
-    rownames(pvals_mat) = rownames(matA) #gene1 names
-    colnames(pvals_mat) = rownames(matB) #gene2 names
+    rownames(global_pvals_mat) = rownames(matA) #gene1 names
+    colnames(global_pvals_mat) = rownames(matB) #gene2 names
 
     classes_mat = matrix(NA,nrow=nrow(matA),ncol=nrow(matB))
     rownames(classes_mat) = rownames(matA) #gene1 names
@@ -70,6 +78,7 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
     for(ix_row in 1:nrow(matA)){ #go row-by-row in matA and compare with matB, then reassemble results matrix
       sse_groups = rep(0,nrow(matB))
       corrs_rg = matrix(NA,nrow=ncol(design_mat),ncol=nrow(matB))
+      slopes_rg = matrix(NA,nrow=ncol(design_mat),ncol=nrow(matB))
       pvals_rg = matrix(NA,nrow=ncol(design_mat),ncol=nrow(matB))
       classes_rg = matrix(NA,nrow=ncol(design_mat),ncol=nrow(matB))
       for(groupn in 1:ncol(design_mat)){
@@ -87,12 +96,15 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
         corrs = WGCNA::cor(t(matAig),t(matBg),use="all.obs",method=corrType) #get Pearson rho, using Cpp fxn from WGCNA
         }
 
+        slopes = corrs * (varB / varA[1])
+
         #calculate p-value for the individual groups
         deg_freedom = ncol(matAig)-2
         in_pt = (abs(corrs) * sqrt(deg_freedom) / sqrt(1 - corrs^2))
         pvals = 2 * (1 - pt(in_pt, deg_freedom))
         corrs_rg[groupn,] = corrs
         pvals_rg[groupn,] = pvals
+        slopes_rg[groupn,] = slopes
         classes_rg[groupn,] = sapply(1:length(corrs),function(x){if((pvals[x]<0.05)&(corrs[x]>0)){"+"}else if((pvals[x]<0.05)&(corrs[x]<0)){"-"}else{"0"}})
 
         #calculate the mlr for each row
@@ -109,6 +121,8 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
         corrs = WGCNA::cor(t(matAi),t(matB),use="all.obs",method=corrType)
       }
 
+      slopes = corrs * (varB / varA[1])
+
       #corr test
       deg_freedom = ncol(matAi)-2
       in_pt = (abs(corrs) * sqrt(deg_freedom) / sqrt(1 - corrs^2))
@@ -122,9 +136,11 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
       p <- pf(f, df1, df2, lower.tail=FALSE)
 
       corrs_mat[ix_row,] = apply(t(corrs_rg),1,paste,collapse="/")
+      slopes_mat[ix_row,] = apply(t(slopes_rg),1,paste,collapse="/")
       pvals_mat[ix_row,] = apply(t(pvals_rg),1,paste,collapse="/")
       global_corrs_mat[ix_row,] = corrs
       global_pvals_mat[ix_row,] = corr_pvals
+      global_slopes_mat[ix_row,] = slopes
       classes_mat[ix_row,] = apply(t(classes_rg),1,paste,collapse="/")
       results_mat[ix_row,] = p
     } #end row
@@ -143,13 +159,21 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
     rownames(pvals_mat) = rownames(matA) #gene1 names
     colnames(pvals_mat) = rownames(matB) #gene2 names
 
+    slopes_mat = matrix(NA,nrow=nrow(matA),ncol=nrow(matB))
+    rownames(slopes_mat) = rownames(matA) #gene1 names
+    colnames(slopes_mat) = rownames(matB) #gene2 names
+
     global_corrs_mat = matrix(NA,nrow=nrow(matA),ncol=nrow(matB))
-    rownames(corrs_mat) = rownames(matA) #gene1 names
-    colnames(corrs_mat) = rownames(matB) #gene2 names
+    rownames(global_corrs_mat) = rownames(matA) #gene1 names
+    colnames(global_corrs_mat) = rownames(matB) #gene2 names
+
+    global_slopes_mat = matrix(NA,nrow=nrow(matA),ncol=nrow(matB))
+    rownames(global_slopes_mat) = rownames(matA) #gene1 names
+    colnames(global_slopes_mat) = rownames(matB) #gene2 names
 
     global_pvals_mat = matrix(NA,nrow=nrow(matA),ncol=nrow(matB))
-    rownames(pvals_mat) = rownames(matA) #gene1 names
-    colnames(pvals_mat) = rownames(matB) #gene2 names
+    rownames(global_pvals_mat) = rownames(matA) #gene1 names
+    colnames(global_pvals_mat) = rownames(matB) #gene2 names
 
     classes_mat = matrix(NA,nrow=nrow(matA),ncol=nrow(matB))
     rownames(classes_mat) = rownames(matA) #gene1 names
@@ -179,6 +203,7 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
       print(paste0("working on row ",ix_row," ..."))
       sse_groups = rep(0,nrow(matB)-ix_row+1)
       corrs_rg = matrix(NA,nrow=ncol(design_mat),ncol=(nrow(matB)-ix_row+1))
+      slopes_rg = matrix(NA,nrow=ncol(design_mat),ncol=(nrow(matB)-ix_row+1))
       pvals_rg = matrix(NA,nrow=ncol(design_mat),ncol=(nrow(matB)-ix_row+1))
       classes_rg = matrix(NA,nrow=ncol(design_mat),ncol=(nrow(matB)-ix_row+1))
       for(groupn in 1:ncol(design_mat)){
@@ -195,12 +220,16 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
         } else {
         corrs = WGCNA::cor(t(matAig),t(matBg),use="all.obs",method=corrType) #get Pearson rho, using Cpp fxn from WGCNA
         }
+
+        slopes = corrs * (varB / varA[1])
+
         #calculate p-value for the individual groups
         deg_freedom = ncol(matAig)-2
         in_pt = (abs(corrs) * sqrt(deg_freedom) / sqrt(1 - corrs^2))
         pvals = 2 * (1 - pt(in_pt, deg_freedom))
         corrs_rg[groupn,] = corrs
         pvals_rg[groupn,] = pvals
+        slopes_rg[groupn,] = slopes
         classes_rg[groupn,] = sapply(1:length(corrs),function(x){if((pvals[x]<0.05)&(corrs[x]>0)){"+"}else if((pvals[x]<0.05)&(corrs[x]<0)){"-"}else{"0"}})
         sse_groups = sse_groups + (varB-covsAB*(corrs/sqrt(varA%*%(1/varB))))*(ncol(matBg)-1)
       } #end group
@@ -216,6 +245,8 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
         corrs = WGCNA::cor(t(matAi),t(matBi),use="all.obs",method=corrType)
       }
 
+      slopes = corrs * (varB / varA[1])
+
       #corr test
       deg_freedom = ncol(matAi)-2
       in_pt = (abs(corrs) * sqrt(deg_freedom) / sqrt(1 - corrs^2))
@@ -229,17 +260,19 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
       p <- pf(f, df1, df2, lower.tail=FALSE)
 
       corrs_mat[ix_row,ix_row:nrow(matB)] = apply(t(corrs_rg),1,paste,collapse="/")
+      slopes_mat[ix_row,ix_row:nrow(matB)] = apply(t(slopes_rg),1,paste,collapse="/")
       pvals_mat[ix_row,ix_row:nrow(matB)] = apply(t(pvals_rg),1,paste,collapse="/")
       global_corrs_mat[ix_row,ix_row:nrow(matB)] = corrs
       global_pvals_mat[ix_row,ix_row:nrow(matB)] = corr_pvals
+      global_slopes_mat[ix_row,ix_row:nrow(matB)] = slopes
       classes_mat[ix_row,ix_row:nrow(matB)] = apply(t(classes_rg),1,paste,collapse="/")
       results_mat[ix_row,ix_row:nrow(matB)] = p
       #list(classes=apply(t(classes_rg),1,paste,collapse="/"),pvalues=p)
     } #end row
   } #end else
   diag(results_mat) = 1
-  output = list(corrs=corrs_mat,corrsP=pvals_mat,globalCor=global_corrs_mat,
-                globalCorP=global_pvals_mat,pvalues=results_mat,classes=classes_mat,
+  output = list(corrs=corrs_mat,slopes = slopes_mat, corrsP=pvals_mat,globalCor=global_corrs_mat,
+                globalSlope = global_slopes_mat, globalCorP=global_pvals_mat,pvalues=results_mat,classes=classes_mat,
                 secondMat=secondMat,groups_compared=paste(colnames(design_mat),collapse="/"))
   return(output)
 }

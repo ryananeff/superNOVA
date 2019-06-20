@@ -10,16 +10,20 @@ flattenChow = function(chow_result){
   corrsflat = cbind(which(!is.na(chow_result$corrs),arr.ind = TRUE),na.omit(as.vector(chow_result$corrs)))
   corrsflat[,1] = sapply(corrsflat[,1],function(x){rownames[as.numeric(x)]})
   corrsflat[,2] = sapply(corrsflat[,2],function(x){colnames[as.numeric(x)]})
-  columns = c("Gene1","Gene2","groupCor","groupCorPval","globalCor","globalCorP","pValDiff","qValDiff","Classes","group_order")
+  columns = c("Gene1","Gene2","groupCor","groupSlope","groupCorPval", #1-5
+              "globalCor","globalSlope","globalCorP","pValDiff","qValDiff", #6-10
+              "Classes","group_order") #11-12
   output = data.frame(matrix(NA,nrow=nrow(corrsflat),ncol=length(columns)))
   output[,1:3] = corrsflat
-  output[,4] = na.omit(as.vector(chow_result$corrsP))
-  output[,5] = na.omit(as.vector(chow_result$globalCor))
-  output[,6] = na.omit(as.vector(chow_result$globalCorP))
-  output[,7] = as.numeric(na.omit(as.vector(chow_result$pvalues)))
-  output[,8] = as.matrix(getQValue(output[,7])$qvalues)
-  output[,9] = na.omit(as.vector(chow_result$classes))
-  output[,10] = rep(chow_result$groups_compared)
+  output[,4] = na.omit(as.vector(chow_result$slopes))
+  output[,5] = na.omit(as.vector(chow_result$corrsP))
+  output[,6] = na.omit(as.vector(chow_result$globalCor))
+  output[,7] = na.omit(as.vector(chow_result$globalSlope))
+  output[,8] = na.omit(as.vector(chow_result$globalCorP))
+  output[,9] = as.numeric(na.omit(as.vector(chow_result$pvalues)))
+  output[,10] = as.matrix(getQValue(output[,9])$qvalues)
+  output[,11] = na.omit(as.vector(chow_result$classes))
+  output[,12] = rep(chow_result$groups_compared)
   colnames(output) = columns
   output = output[output$Gene1!=output$Gene2,] #don't output self matching rows
   output = output[order(output$pValDiff,method = "radix"),] #order the rows with most significant first

@@ -16,17 +16,23 @@ hybridCorMat <- function(input_file, output_file_prefix, diffCor_cutoff = 0.05, 
   header = TRUE
   need_subtypes = TRUE
   subtype_files  = c()
+  sheader = NULL
   while(continue){
     buffer = readLines(con=fp,n=bufflen,ok=TRUE)
     if(length(buffer)!=bufflen) { continue=FALSE }
     for (line in buffer){
+      splitline = unlist(strsplit(trimws(line), '\t'))
+
       if(header){ #to ignore the header line
         header=FALSE
+        sheader = setNames(1:length(splitline),splitline)
+        if(!("Gene1" in splitline)){
+          stop("Please ensure your input file has a header in the first row from superNOVA.")
+        }
         next
       }
 
-      splitline = unlist(strsplit(trimws(line), '\t'))
-      subtypes = unlist(strsplit(splitline[10],'/'))
+      subtypes = unlist(strsplit(splitline[sheader[["group_order"]]],'/'))
 
       if(need_subtypes){
         subtype_files = list()
@@ -39,21 +45,22 @@ hybridCorMat <- function(input_file, output_file_prefix, diffCor_cutoff = 0.05, 
         need_subtypes = FALSE
       }
 
-      row = splitline[1]
-      col = splitline[2]
-      pValDiff = as.numeric(splitline[7]) #supernova diffcor pvalue
+      row = splitline[sheader[["Gene1"]]]
+      col = splitline[sheader[["Gene2"]]]
+
+      pValDiff = as.numeric(splitline[sheader[["pValDiff"]]]) #supernova diffcor pvalue
 
       if(pValDiff < diffCor_cutoff){
-        groupCors = as.numeric(unlist(strsplit(splitline[3],'/')))
-        groupCorsPvals = as.numeric(unlist(strsplit(splitline[4],'/'))) #subgroup cor pvalue for pair
+        groupCors = as.numeric(unlist(strsplit(splitline[sheader[["groupCor"]]],'/')))
+        groupCorsPvals = as.numeric(unlist(strsplit(splitline[sheader[["groupCorPval"]]],'/'))) #subgroup cor pvalue for pair
         for(ix in 1:length(subtype_files)){
           if(groupCorsPvals[ix] < corPval_cutoff){
             writeLines(paste(row,col,groupCors[ix],sep='\t'),con=subtype_files[[ix]]) #write subtype-specific rho to file
           }
         }
       } else {
-        globalCor = as.numeric(splitline[5])
-        globalCorP = as.numeric(splitline[6]) #global cor pvalue for pair
+        globalCor = as.numeric(splitline[sheader[["globalCor"]]])
+        globalCorP = as.numeric(splitline[sheader[["globalCorP"]]]) #global cor pvalue for pair
         if(globalCorP < corPval_cutoff){
           for(ix in 1:length(subtype_files)){
             writeLines(paste(row,col,globalCor,sep='\t'),con=subtype_files[[ix]]) #write global rho to all files
