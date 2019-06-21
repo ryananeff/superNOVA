@@ -29,6 +29,10 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
     rownames(results_mat) = rownames(matA) #gene1 names
     colnames(results_mat) = rownames(matB) #gene2 names
 
+    ftest_mat = matrix(NA,nrow=nrow(matA),ncol=nrow(matB))
+    rownames(ftest_mat) = rownames(matA) #gene1 names
+    colnames(ftest_mat) = rownames(matB) #gene2 names
+
     corrs_mat = matrix(NA,nrow=nrow(matA),ncol=nrow(matB))
     rownames(corrs_mat) = rownames(matA) #gene1 names
     colnames(corrs_mat) = rownames(matB) #gene2 names
@@ -142,6 +146,7 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
       global_pvals_mat[ix_row,] = corr_pvals
       global_slopes_mat[ix_row,] = slopes
       classes_mat[ix_row,] = apply(t(classes_rg),1,paste,collapse="/")
+      ftest_mat[ix_row,] = f
       results_mat[ix_row,] = p
     } #end row
   } else { #if we are only looking at one input matrix (comparing all gene pairs)
@@ -150,6 +155,10 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
     results_mat = matrix(NA,nrow=nrow(matA),ncol=nrow(matB))
     rownames(results_mat) = rownames(matA) #gene1 names
     colnames(results_mat) = rownames(matB) #gene2 names
+
+    ftest_mat = matrix(NA,nrow=nrow(matA),ncol=nrow(matB))
+    rownames(ftest_mat) = rownames(matA) #gene1 names
+    colnames(ftest_mat) = rownames(matB) #gene2 names
 
     corrs_mat = matrix(NA,nrow=nrow(matA),ncol=nrow(matB))
     rownames(corrs_mat) = rownames(matA) #gene1 names
@@ -266,13 +275,15 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
       global_pvals_mat[ix_row,ix_row:nrow(matB)] = corr_pvals
       global_slopes_mat[ix_row,ix_row:nrow(matB)] = slopes
       classes_mat[ix_row,ix_row:nrow(matB)] = apply(t(classes_rg),1,paste,collapse="/")
+      ftest_mat[ix_row,ix_row:nrow(matB)] = f
       results_mat[ix_row,ix_row:nrow(matB)] = p
       #list(classes=apply(t(classes_rg),1,paste,collapse="/"),pvalues=p)
     } #end row
   } #end else
   diag(results_mat) = 1
-  output = list(corrs=corrs_mat,slopes = slopes_mat, corrsP=pvals_mat,globalCor=global_corrs_mat,
-                globalSlope = global_slopes_mat, globalCorP=global_pvals_mat,pvalues=results_mat,classes=classes_mat,
-                secondMat=secondMat,groups_compared=paste(colnames(design_mat),collapse="/"))
+  output = list(corrs=corrs_mat, slopes=slopes_mat, corrsP=pvals_mat, globalCor=global_corrs_mat,
+                globalSlope=global_slopes_mat, globalCorP=global_pvals_mat, Ftest = ftest_mat,
+                pvalues=results_mat,classes=classes_mat, secondMat=secondMat,
+                groups_compared=paste(colnames(design_mat),collapse="/"))
   return(output)
 }
