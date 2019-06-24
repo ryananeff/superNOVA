@@ -8,6 +8,7 @@
 #' @return Returns a list of matrices, includes pvalues for the superNOVA test (pvalues) and their classes (classes), correlation values for each subgroup model (corrs) and their pvalues (corrsP), correlation values for the global model (globalCor) and its pvalues (globalCorP), and a flag to indicate whether a second matrix was used (secondMat).
 #' @keywords superNOVA
 #' @importFrom stats cov na.omit pf pt var
+#' @importFrom progress progress_bar
 #' @export
 chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
 
@@ -89,7 +90,7 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
 
     for(ix_row in 1:nrow(matA)){ #go row-by-row in matA and compare with matB, then reassemble results matrix
 
-      pb$tick(tokens = list(what = paste0(rownames(matA)[ix_row]+ "  ")))
+      pb$tick(tokens = list(what = paste0(rownames(matA)[ix_row],"  ")))
 
       sse_groups = rep(0,nrow(matB))
       corrs_rg = matrix(NA,nrow=ncol(design_mat),ncol=nrow(matB))
@@ -225,7 +226,7 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
 
     for(ix_row in 1:nrow(matA)){ #go row-by-row in matA and compare with matB, then reassemble results matrix
 
-      pb$tick(tokens = list(what = paste0(rownames(matA)[ix_row]+ "  ")))
+      pb$tick(tokens = list(what = paste0(rownames(matA)[ix_row],"  ")))
 
       sse_groups = rep(0,nrow(matB)-ix_row+1)
       corrs_rg = matrix(NA,nrow=ncol(design_mat),ncol=(nrow(matB)-ix_row+1))

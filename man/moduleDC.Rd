@@ -4,9 +4,10 @@
 \alias{moduleDC}
 \title{Calculate modular differential connectivity (MDC)}
 \usage{
-moduleDC(inputMat, design, compare, genes, labels,
-  gene_avg_signif = 0.05, number_DC_genes = 3, adjust = "bonferroni",
-  bySlope = FALSE)
+moduleDC(inputMat = inputMat, design = design, compare = compare,
+  genes = genes, labels = labels, gene_avg_signif = 0.05,
+  number_DC_genes = 3, adjust = "bonferroni", bySlope = FALSE,
+  corrType = "bicor")
 }
 \arguments{
 \item{inputMat}{The matrix (or data.frame) of values (e.g., gene expression values from an RNA-seq or microarray study) that you are interested in analyzing. The rownames of this matrix should correspond to the identifiers whose correlations and differential correlations you are interested in analyzing, while the columns should correspond to the rows of the design matrix and should be separable into your groups.}
@@ -23,6 +24,8 @@ moduleDC(inputMat, design, compare, genes, labels,
 
 \item{number_DC_genes}{The number of top differentially correlated genes with more correlation in each condition in each module to return in the data frame.}
 
+\item{corrType}{The correlation type of the analysis, limited to "pearson" or "spearman". Default = "pearson".}
+
 \item{corr_cutoff}{Cutoff specifying correlation values beyond which will be truncated to this value, to reduce the effect of outlier correlation values when using small sample sizes. Note that this does NOT affect the underlying correlation values, but does affect the z-score difference of correlation calculation in the dcTopPairs table. Default = 0.99}
 
 \item{signType}{Coerce all correlation coefficients to be either positive (via "positive"), negative (via "negative"), or none (via "none") prior to calculating differential correlation. This could be used if, e.g., you think that going from a positive to a negative correlation is unlikely to occur biologically and is more likely to be due to noise, and you want to ignore these effects. Note that this does NOT affect the reported underlying correlation values, but does affect the z-score difference of correlation calculation. Default = "none", for no coercing.}
@@ -30,8 +33,6 @@ moduleDC(inputMat, design, compare, genes, labels,
 \item{oneSidedPVal}{If the dCorAvgType test is total_average, this option specifies whether a one-sided p-value should be reported, as opposed to a two-sided p-value. That is, if the average difference of z-scores is greater than zero, test whether the permutation average difference of z-scores are less than that average to get the p-value, and vice versa for the case that the average difference of z-scores is less than 0. Otherwise, test whether the absolute value of the average difference in z-scores is greater than the absolute values of the permutation average difference in z-scores. Default = FALSE.}
 
 \item{dCorAvgMethod}{Character vector specifying the method for calculating the "average" differential correlation calculation that should be used. Options = "median", "mean".}
-
-\item{corrType}{The correlation type of the analysis, limited to "pearson" or "spearman". Default = "pearson".}
 
 \item{nPerms}{Number of permutations to generate in order to calculate the significance of the result.}
 
