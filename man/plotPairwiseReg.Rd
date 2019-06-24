@@ -10,6 +10,10 @@ plotPairwiseReg(geneA, geneB, datExpr, design_mat)
 \item{geneA}{The first gene to plot.}
 
 \item{geneB}{The second gene in coexpression with the first gene.}
+
+\item{datExpr}{A gene expression matrix (gene rows by sample columns).}
+
+\item{design_mat}{A model matrix (sample rows by group columns) with 0 or 1 denoting membership in the group.}
 }
 \value{
 A plot of geneA vs geneB expression with subgroup correlations highlighted.

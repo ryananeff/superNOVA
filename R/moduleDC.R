@@ -66,8 +66,8 @@ moduleDC <- function(inputMat, design, compare, genes, labels,
       pvalues_arr = tmp
 
       gene_level_p = apply(pvalues_arr,1,function(x){1-pchisq(sum(-2*log(x)),df=2*length(x))})
-      gene_avg = gene_level_p
-      gene_avg_sig = gene_avg[gene_avg < gene_avg_signif, ]
+      #gene_avg = gene_level_p
+      #gene_avg_sig = gene_avg[gene_avg < gene_avg_signif, ]
 
       group_num = match(compare,all_groups)
 

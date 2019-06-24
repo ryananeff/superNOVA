@@ -18,7 +18,7 @@
 #' @param conditional Logical specifying whether the GO analysis should be done conditionally to take into account the hierarchical structure of the GO database in making sense of the gene set enrichments.
 #' @param superNOVA_find_significant Logical specifying whether this enrichment analysis should be performed on the result of a superNOVA analysis. If FALSE, then a superGO_res object, which is a named list of gene vectors, must be defined instead.
 #' @param superGO_res Optional named list of gene vectors to find the enrichment of if superNOVA_find_signficiant is FALSE.
-#' @import GOstats HGNChelper annotation
+#' @import GOstats HGNChelper AnnotationDbi
 #' @return A list of data frames corresponding to the gene ontology enrichment analysis results for the extracted gene sets from each of the differential correlation classes.
 #' @references Agresti A: Categorical Data Analysis. 2012:70-77.
 #' @export
@@ -42,8 +42,8 @@ superGO <- function(superNOVA_res, universe, pval_gene_thresh = 0.05,
   }
 
   if(HGNC_switch){
-    if (!requireNamespace(annotation, quietly = TRUE)) {
-      stop("The R package", annotation, "is needed for the superGO function to work with the annotation argument you chose. Please install it.",
+    if (!requireNamespace("AnnotationDbi", quietly = TRUE)) {
+      stop("The R package AnnotationDbi is needed for the superGO function to work with the annotation argument you chose. Please install it.",
         call. = FALSE)
     }
   }
