@@ -85,12 +85,12 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
     varsB = apply(matB,1,function(x){var(x)})
 
     pb <- progress_bar$new(
-      format = " [chowCor] gene :what [:bar] :current/:total (:percent) eta: :eta",
-      clear = FALSE, total = nrow(matA), width = 80)
+      format = " [chowCor] [:bar] :current/:total (:percent) eta: :eta gene: :what",
+      clear = FALSE, total = nrow(matA), width = 100)
 
     for(ix_row in 1:nrow(matA)){ #go row-by-row in matA and compare with matB, then reassemble results matrix
 
-      pb$tick(tokens = list(what = paste0(rownames(matA)[ix_row],"  ")))
+      pb$tick(tokens = list(what = sprintf(rownames(matA)[ix_row],fmt="%15s")))
 
       sse_groups = rep(0,nrow(matB))
       corrs_rg = matrix(NA,nrow=ncol(design_mat),ncol=nrow(matB))
@@ -221,12 +221,12 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
     varsB = varsA
 
     pb <- progress_bar$new(
-      format = " [chowCor] gene :what [:bar] :current/:total (:percent) eta: :eta",
-      clear = FALSE, total = nrow(matA), width = 80)
+      format = " [chowCor] [:bar] :current/:total (:percent) eta: :eta gene: :what",
+      clear = FALSE, total = nrow(matA), width = 100)
 
     for(ix_row in 1:nrow(matA)){ #go row-by-row in matA and compare with matB, then reassemble results matrix
 
-      pb$tick(tokens = list(what = paste0(rownames(matA)[ix_row],"  ")))
+      pb$tick(tokens = list(what = sprintf(rownames(matA)[ix_row],fmt="%15s")))
 
       sse_groups = rep(0,nrow(matB)-ix_row+1)
       corrs_rg = matrix(NA,nrow=ncol(design_mat),ncol=(nrow(matB)-ix_row+1))
