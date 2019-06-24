@@ -46,7 +46,7 @@ moduleDC <- function(inputMat, design, compare, genes, labels,
       module_size[i] = length(genes_tmp)
       inputMat_tmp = inputMat[match(genes_tmp,rownames(inputMat),nomatch=F), ]
 
-      chow_res = chowCor(inputMat = inputMat_tmp, design = design, compare = compare, corrType = corrType)
+      chow_res = chowCor(matA = inputMat_tmp, design_mat = design, compare = compare, corrType = corrType)
       supernova_res = flattenChow(chow_res)
 
       #Fisher's method of combining p-values is most appropriate
