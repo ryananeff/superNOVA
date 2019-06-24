@@ -10,6 +10,7 @@
 #' @importFrom stats cov na.omit pf pt var
 #' @export
 chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
+
   if(!is.null(matB)){secondMat=TRUE} else {secondMat=FALSE; matB = matA}
   if(!is.null(compare)){
     if(length(compare)<2){stop("number of groups to compare must be 2 or larger")}
@@ -23,6 +24,8 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
   },error=function(e){
     stop("Row names in design matrix do not match column names in input.")
   })
+
+
   if(secondMat){ #if we are comparing two matrices
 
     results_mat = matrix(NA,nrow=nrow(matA),ncol=nrow(matB))
@@ -64,6 +67,7 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
     varsA_group = matrix(NA,nrow=ncol(design_mat),ncol=nrow(matA))
     varsB_group = matrix(NA,nrow=ncol(design_mat),ncol=nrow(matB))
 
+
     for(groupn in 1:ncol(design_mat)){
       matAg = matA[,design_mat[,groupn]==1,drop=FALSE]
       matBg = matB[,design_mat[,groupn]==1,drop=FALSE]
@@ -79,7 +83,14 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
     varsA = apply(matA,1,function(x){var(x)})
     varsB = apply(matB,1,function(x){var(x)})
 
+    pb <- progress_bar$new(
+      format = " [chowCor] gene :what [:bar] :current/:total (:percent) eta: :eta",
+      clear = FALSE, total = nrow(matA), width = 80)
+
     for(ix_row in 1:nrow(matA)){ #go row-by-row in matA and compare with matB, then reassemble results matrix
+
+      pb$tick(tokens = list(what = paste0(rownames(matA)[ix_row]+ "  ")))
+
       sse_groups = rep(0,nrow(matB))
       corrs_rg = matrix(NA,nrow=ncol(design_mat),ncol=nrow(matB))
       slopes_rg = matrix(NA,nrow=ncol(design_mat),ncol=nrow(matB))
@@ -208,8 +219,14 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
     varsA = apply(matA,1,function(x){var(x)})
     varsB = varsA
 
+    pb <- progress_bar$new(
+      format = " [chowCor] gene :what [:bar] :current/:total (:percent) eta: :eta",
+      clear = FALSE, total = nrow(matA), width = 80)
+
     for(ix_row in 1:nrow(matA)){ #go row-by-row in matA and compare with matB, then reassemble results matrix
-      print(paste0("working on row ",ix_row," ..."))
+
+      pb$tick(tokens = list(what = paste0(rownames(matA)[ix_row]+ "  ")))
+
       sse_groups = rep(0,nrow(matB)-ix_row+1)
       corrs_rg = matrix(NA,nrow=ncol(design_mat),ncol=(nrow(matB)-ix_row+1))
       slopes_rg = matrix(NA,nrow=ncol(design_mat),ncol=(nrow(matB)-ix_row+1))
