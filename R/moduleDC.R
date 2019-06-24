@@ -37,6 +37,8 @@ moduleDC <- function(inputMat=inputMat, design=design, compare=compare, genes=ge
   mdc_signif = vector()
   mdc_signif_adj = vector()
   module_size = vector()
+  df = vector()
+  genes_sig = vector()
   goc_genes = vector()
   loc_genes = vector()
   gene_pval = vector()
@@ -48,16 +50,19 @@ moduleDC <- function(inputMat=inputMat, design=design, compare=compare, genes=ge
       inputMat_tmp = inputMat[match(genes_tmp,rownames(inputMat),nomatch=F), ]
 
       chow_res = chowCor(matA = inputMat_tmp, design_mat = design, compare = compare, corrType = corrType)
+      chow_res_out <<- chow_res
       supernova_res = flattenChow(chow_res)
+      supernova_res_out <<- supernova_res
 
       #Fisher's method of combining p-values is most appropriate
       # since the alternative is that SS_global > SS_subgroups
       # see: http://dx.doi.org/10.1093/biomet/asx076
       log2_pval_sum = sum(-2*log(supernova_res$pValDiff))
-      n_pval = 2*sum(supernova_res$pValDiff)
+      n_pval = 2*length(supernova_res$pValDiff)
       combined_p = 1-pchisq(log2_pval_sum,df=2*n_pval)
       adjust_p = p.adjust(combined_p,method=adjust,n=n_pval)
 
+      df[i] = n_pval
       mdc_vector[i] = log2_pval_sum
       mdc_signif[i] = combined_p
       mdc_signif_adj[i] = adjust_p
@@ -67,12 +72,13 @@ moduleDC <- function(inputMat=inputMat, design=design, compare=compare, genes=ge
       pvalues_arr = tmp
 
       gene_level_p = apply(pvalues_arr,1,function(x){1-pchisq(sum(-2*log(x)),df=2*length(x))})
+      gene_level_p = gene_level_p[order(gene_level_p)]
       #gene_avg = gene_level_p
-      #gene_avg_sig = gene_avg[gene_avg < gene_avg_signif, ]
+      genes_sig[i] = sum(gene_level_p < gene_avg_signif)
 
-      all_groups = colnames(design)
+      #all_groups = colnames(design)
 
-      group_num = match(compare,all_groups)
+      #group_num = match(compare,all_groups)
 
       if(bySlope){
         tmp = chow_res$slopes
@@ -95,13 +101,13 @@ moduleDC <- function(inputMat=inputMat, design=design, compare=compare, genes=ge
       if (length(compare)==1) {
         #compare one group against global model
         group1 = global_corrs_arr
-        group2 = matrix(sapply(corrs_arr,function(x){as.numeric(unlist(strsplit(x,"/"))[group_num])},USE.NAMES = F),
+        group2 = matrix(sapply(corrs_arr,function(x){as.numeric(unlist(strsplit(x,"/"))[1])},USE.NAMES = F),
                         nrow=nrow(corrs_arr),ncol=ncol(corrs_arr))
       } else if (length(compare)==2) {
         #compare two groups against each other
-        group1 = matrix(sapply(corrs_arr,function(x){as.numeric(unlist(strsplit(x,"/"))[group_num[1]])},USE.NAMES = F),
+        group1 = matrix(sapply(corrs_arr,function(x){as.numeric(unlist(strsplit(x,"/"))[1])},USE.NAMES = F),
                         nrow=nrow(corrs_arr),ncol=ncol(corrs_arr))
-        group2 = matrix(sapply(corrs_arr,function(x){as.numeric(unlist(strsplit(x,"/"))[group_num[2]])},USE.NAMES = F),
+        group2 = matrix(sapply(corrs_arr,function(x){as.numeric(unlist(strsplit(x,"/"))[2])},USE.NAMES = F),
                         nrow=nrow(corrs_arr),ncol=ncol(corrs_arr))
       } else {
         stop("[moduleDC] 'compare' may only be used with one or two subgroups.")
@@ -109,17 +115,21 @@ moduleDC <- function(inputMat=inputMat, design=design, compare=compare, genes=ge
       message("[moduleDC] Calculating gene-level stats")
       gene_avg_diff = apply(group2-group1,1,function(x){mean(x)})
       names(gene_avg_diff) = rownames(corrs_arr)
-      gene_avg_goc = names(head(gene_avg_diff[order(gene_avg_diff,decreasing = T)],number_DC_genes))
-      gene_avg_loc = names(head(gene_avg_diff[order(gene_avg_diff)],number_DC_genes))
+      gene_avg_goc = head(gene_avg_diff[order(gene_avg_diff,decreasing = T)],number_DC_genes)
+      gene_avg_loc = head(gene_avg_diff[order(gene_avg_diff)],number_DC_genes)
       gene_pval[i] = paste(lapply(seq_along(gene_level_p),
                                   function(y, n, i) { paste(n[[i]], round(y[[i]],4),sep=":") },
                                   y=gene_level_p, n=names(gene_level_p)),collapse="; ")
-      goc_genes[i] = paste(gene_avg_goc, collapse = ", ")
-      loc_genes[i] = paste(gene_avg_loc, collapse = ", ")
+      goc_genes[i] = paste(lapply(seq_along(gene_avg_goc),
+                                  function(y, n, i) { paste(n[[i]], round(y[[i]],4),sep=":") },
+                                  y=gene_avg_goc, n=names(gene_avg_goc)),collapse="; ")
+      loc_genes[i] = paste(lapply(seq_along(gene_avg_loc),
+                                  function(y, n, i) { paste(n[[i]], round(y[[i]],4),sep=":") },
+                                  y=gene_avg_loc, n=names(gene_avg_loc)),collapse="; ")
 
   }
 
-  res_df = data.frame(Module = labels_names, Size = module_size, MeDC = mdc_vector,
+  res_df = data.frame(Module = labels_names, Size = module_size, genesSignif=genes_sig, MeDC = mdc_vector, df=df,
     pVal = mdc_signif, pValadj = mdc_signif_adj, gene_pVal = gene_pval,
     Top_GOC = goc_genes, Top_LOC = loc_genes)
 
