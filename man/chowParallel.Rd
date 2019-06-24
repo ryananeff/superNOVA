@@ -42,7 +42,7 @@ chowParallel(inputMat, design, outputFile, compare = NULL,
 
 \item{batchDir}{Location to store temporary files, logs, and results of the batch run. This is the registry for the batchtools R package. Default = batchRegistry/}
 
-\item{batchWarningLevel}{Warning level on remote nodes during DGCA calculation (equivalent to setting options(warn=batchWarningLevel). Default = 0.}
+\item{batchWarningLevel}{Warning level on remote nodes during chowCor calculation (equivalent to setting options(warn=batchWarningLevel). Default = 0.}
 
 \item{batchSeed}{Random seed to use on all batch jobs. Default = 12345.}
 

@@ -2,8 +2,8 @@
 #' @description Visualize pairwise gene coexpression correlations for a set of subtypes for two particular genes.
 #' @param geneA The first gene to plot.
 #' @param geneB The second gene in coexpression with the first gene.
-#' @datExpr A gene expression matrix (gene rows by sample columns).
-#' @design_mat A model matrix (sample rows by group columns) with 0 or 1 denoting membership in the group.
+#' @param datExpr A gene expression matrix (gene rows by sample columns).
+#' @param design_mat A model matrix (sample rows by group columns) with 0 or 1 denoting membership in the group.
 #' @return A plot of geneA vs geneB expression with subgroup correlations highlighted.
 #' @import grDevices graphics
 #' @export
