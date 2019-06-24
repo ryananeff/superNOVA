@@ -26,7 +26,7 @@ hybridCorMat <- function(input_file, output_file_prefix, diffCor_cutoff = 0.05, 
       if(header){ #to ignore the header line
         header=FALSE
         sheader = setNames(1:length(splitline),splitline)
-        if(!("Gene1" in splitline)){
+        if(("Gene1" in splitline)==FALSE){
           stop("Please ensure your input file has a header in the first row from superNOVA.")
         }
         next
