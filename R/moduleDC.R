@@ -25,9 +25,9 @@
 #'  compare = c("oligodendrocyte", "neuron"), genes = modules$values,
 #'  labels = modules$ind)
 #' @export
-moduleDC <- function(inputMat, design, compare, genes, labels,
+moduleDC <- function(inputMat=inputMat, design=design, compare=compare, genes=genes, labels=labels,
                      gene_avg_signif = 0.05, number_DC_genes = 3, adjust="bonferroni",
-                     bySlope=FALSE){
+                     bySlope=FALSE,corrType="bicor"){
 
   if(!length(genes) == length(labels)) stop("Genes and labels vectors must be the same length.")
 
@@ -41,7 +41,7 @@ moduleDC <- function(inputMat, design, compare, genes, labels,
   loc_genes = vector()
 
   for(i in 1:length(labels_names)){
-    message(paste0("Calculating MDC for module #", i, ", which is called ", labels_names[i]))
+    message(paste0("Calculating MDC for module #", i, " of ",length(labels_names),", which is called ", labels_names[i]))
       genes_tmp = genes[labels == labels_names[i]]
       module_size[i] = length(genes_tmp)
       inputMat_tmp = inputMat[match(genes_tmp,rownames(inputMat),nomatch=F), ]
@@ -55,7 +55,7 @@ moduleDC <- function(inputMat, design, compare, genes, labels,
       log2_pval_sum = sum(-2*log(supernova_res$pValDiff))
       n_pval = 2*sum(supernova_res$pValDiff)
       combined_p = 1-pchisq(log2_pval_sum,df=2*n_pval)
-      adjust_p = p.adjust(combined_p,method=method,n=n_pval)
+      adjust_p = p.adjust(combined_p,method=adjust,n=n_pval)
 
       mdc_vector[i] = log2_pval_sum
       mdc_signif[i] = combined_p
@@ -68,6 +68,8 @@ moduleDC <- function(inputMat, design, compare, genes, labels,
       gene_level_p = apply(pvalues_arr,1,function(x){1-pchisq(sum(-2*log(x)),df=2*length(x))})
       #gene_avg = gene_level_p
       #gene_avg_sig = gene_avg[gene_avg < gene_avg_signif, ]
+
+      all_groups = colnames(design)
 
       group_num = match(compare,all_groups)
 
