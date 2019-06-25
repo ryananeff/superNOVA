@@ -27,7 +27,9 @@
 #' @export
 moduleDC <- function(inputMat=inputMat, inputMatB=NULL, design=design, compare=compare, genes=genes, labels=labels,
                      gene_avg_signif = 0.05, number_DC_genes = 3, adjust="bonferroni",
-                     bySlope=FALSE,corrType="bicor"){
+                     bySlope=FALSE,corrType="bicor",parallel=F,
+                     batchConfig = "/home/ryan/R/x86_64-pc-linux-gnu-library/3.4/superNOVA/config/batchConfig_Local.R",
+                     split=split){
 
   if(!length(genes) == length(labels)) stop("Genes and labels vectors must be the same length.")
 
@@ -48,9 +50,21 @@ moduleDC <- function(inputMat=inputMat, inputMatB=NULL, design=design, compare=c
       genes_tmp = genes[labels == labels_names[i]]
       module_size[i] = length(genes_tmp)
       inputMat_tmp = inputMat[match(genes_tmp,rownames(inputMat),nomatch=F), ]
-
-      chow_res = chowCor(matA = inputMat_tmp, matB=inputMatB, design_mat = design, compare = compare, corrType = corrType)
-      supernova_res = flattenChow(chow_res)
+      
+      if(!(parallel)){
+        chow_res = chowCor(matA = inputMat_tmp, matB=inputMatB, design_mat = design, compare = compare, corrType = corrType)
+        supernova_res = flattenChow(chow_res)
+      } else {
+        outputfile = "tmp_moduleDC.tsv"
+        combined = rbind(inputMat_tmp,matB) #temporarily for now
+        superNOVA::chowParallel(design=design_mat,
+                              inputMat = combined,
+                              compare = compare,
+                              corrType = corrType, outputFile = outputfile,
+                              batchConfig = batchConfig,
+                              perBatch=split,coresPerJob = 1,batchDir = "tmp_batch/",sigOutput=F)
+        supernova_res = read.table(outputfile,header=T)
+      }
 
       #Fisher's method of combining p-values is most appropriate
       # since the alternative is that SS_global > SS_subgroups
