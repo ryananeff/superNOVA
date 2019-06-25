@@ -56,7 +56,7 @@ moduleDC <- function(inputMat=inputMat, inputMatB=NULL, design=design, compare=c
         supernova_res = flattenChow(chow_res)
       } else {
         outputfile = "tmp_moduleDC.tsv"
-        combined = rbind(inputMat_tmp,matB) #temporarily for now
+        combined = rbind(inputMat_tmp,inputMatB) #temporarily for now
         superNOVA::chowParallel(design=design_mat,
                               inputMat = combined,
                               compare = compare,
