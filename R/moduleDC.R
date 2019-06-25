@@ -25,7 +25,7 @@
 #'  compare = c("oligodendrocyte", "neuron"), genes = modules$values,
 #'  labels = modules$ind)
 #' @export
-moduleDC <- function(inputMat=inputMat, design=design, compare=compare, genes=genes, labels=labels,
+moduleDC <- function(inputMat=inputMat, inputMatB=NULL, design=design, compare=compare, genes=genes, labels=labels,
                      gene_avg_signif = 0.05, number_DC_genes = 3, adjust="bonferroni",
                      bySlope=FALSE,corrType="bicor"){
 
@@ -49,10 +49,8 @@ moduleDC <- function(inputMat=inputMat, design=design, compare=compare, genes=ge
       module_size[i] = length(genes_tmp)
       inputMat_tmp = inputMat[match(genes_tmp,rownames(inputMat),nomatch=F), ]
 
-      chow_res = chowCor(matA = inputMat_tmp, design_mat = design, compare = compare, corrType = corrType)
-      chow_res_out <<- chow_res
+      chow_res = chowCor(matA = inputMat_tmp, matB=inputMatB, design_mat = design, compare = compare, corrType = corrType)
       supernova_res = flattenChow(chow_res)
-      supernova_res_out <<- supernova_res
 
       #Fisher's method of combining p-values is most appropriate
       # since the alternative is that SS_global > SS_subgroups
