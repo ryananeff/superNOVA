@@ -59,7 +59,7 @@ moduleDC <- function(inputMat=inputMat, design=design, compare=compare, genes=ge
       # see: http://dx.doi.org/10.1093/biomet/asx076
       log2_pval_sum = sum(-2*log(supernova_res$pValDiff))
       n_pval = 2*length(supernova_res$pValDiff)
-      combined_p = 1-pchisq(log2_pval_sum,df=2*n_pval)
+      combined_p = 1-pchisq(log2_pval_sum,df=n_pval)
       adjust_p = p.adjust(combined_p,method=adjust,n=n_pval)
 
       df[i] = n_pval
