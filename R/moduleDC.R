@@ -49,8 +49,11 @@ moduleDC <- function(inputMat=inputMat, inputMatB=NULL, design=design, compare=c
     message(paste0("[moduleDC] Calculating MDC for module #", i, " of ",length(labels_names),", which is called ", labels_names[i]))
       genes_tmp = genes[labels == labels_names[i]]
       module_size[i] = length(genes_tmp)
-      inputMat_tmp = inputMat[match(genes_tmp,rownames(inputMat),nomatch=F), ]
-      
+      inputMat_tmp = inputMat[match(genes_tmp,rownames(inputMat),nomatch=F), ,drop=FALSE]
+      if(nrow(inputMat_tmp) <= 1){
+        message('[moduleDC] too few genes in set, skipping...')
+        next
+      }
       if(!(parallel)){
         chow_res = chowCor(matA = inputMat_tmp, matB=inputMatB, design_mat = design, compare = compare, corrType = corrType)
         supernova_res = flattenChow(chow_res)
@@ -78,6 +81,8 @@ moduleDC <- function(inputMat=inputMat, inputMatB=NULL, design=design, compare=c
       mdc_vector[i] = log2_pval_sum
       mdc_signif[i] = combined_p
       mdc_signif_adj[i] = adjust_p
+
+      message("[moduleDC] Calculating gene-level stats")
 
       tmp = chow_res$pvalues
       tmp[lower.tri(tmp)] = t(tmp)[lower.tri(t(tmp))]
@@ -124,7 +129,7 @@ moduleDC <- function(inputMat=inputMat, inputMatB=NULL, design=design, compare=c
       } else {
         stop("[moduleDC] 'compare' may only be used with one or two subgroups.")
       }
-      message("[moduleDC] Calculating gene-level stats")
+
       gene_avg_diff = apply(group2-group1,1,function(x){mean(x)})
       names(gene_avg_diff) = rownames(corrs_arr)
       gene_avg_goc = head(gene_avg_diff[order(gene_avg_diff,decreasing = T)],number_DC_genes)

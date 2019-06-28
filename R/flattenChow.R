@@ -1,10 +1,12 @@
 #' @title Convert the output from superNOVA chowCor to an annotated edgelist, suitable for writing out to a .tsv file.
 #' @description Takes in results from chowCor as a list of 2d matrices and converts it into a single data.frame, where the first two columns are an edgelist of all pairs compared.
 #' @param chow_result A list of matrices as output by chowCor. Required
+#' @param adjust_q Should the q-values be calculated? Otherwise, qValDiff will be the same as pValDiff
+#' @param sort_output Should the final output be sorted from smallest to largest p-values?
 #' @return Returns a data.frame, sorted by superNOVA p-value, where each row is a feature pair, with columns "Gene1","Gene2","groupCor","groupCorPval","globalCor","globalCorP","pValDiff","Classes".
 #' @keywords superNOVA
 #' @export
-flattenChow = function(chow_result){
+flattenChow = function(chow_result, adjust_q=T, sort_output=T){
   rownames = rownames(chow_result$corrs)
   colnames = colnames(chow_result$corrs)
   corrsflat = cbind(which(!is.na(chow_result$corrs),arr.ind = TRUE),na.omit(as.vector(chow_result$corrs)))
@@ -21,7 +23,12 @@ flattenChow = function(chow_result){
   output[,7] = na.omit(as.vector(chow_result$globalSlope))
   output[,8] = na.omit(as.vector(chow_result$globalCorP))
   output[,9] = as.numeric(na.omit(as.vector(chow_result$pvalues)))
-  output[,10] = as.matrix(getQValue(output[,9])$qvalues)
+  if (adjust_q){
+    output[,10] = as.matrix(getQValue(output[,9])$qvalues)
+  }
+  else {
+    output[,10] = output[,9]
+  }
   output[,11] = na.omit(as.vector(chow_result$classes))
   output[,12] = rep(chow_result$groups_compared)
   colnames(output) = columns

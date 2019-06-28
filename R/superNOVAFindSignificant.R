@@ -27,7 +27,7 @@ superNOVAFindSignificant <- function(superNOVA_res, pval_gene_thresh = 0.05, adj
   }
 
   if(classes){ #break down everything by classes
-    superNOVA_res_sig_list = split(ddcor_res,ddcor_res$Classes) #this creates a list of data frames
+    superNOVA_res_sig_list = split(superNOVA_res,superNOVA_res$Classes) #this creates a list of data frames
     if(unique_genes){
       for(i in 1:length(superNOVA_res_sig_list)){
         superNOVA_res_sig_list_i_rem = superNOVA_res_sig_list[-i]

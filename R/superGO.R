@@ -1,7 +1,7 @@
 #' @title Gene ontology of differential correlation-classified genes.
 #' @description Extracts a data frame of the top enriched gene sets in gene ontology databases using the hypergeometric test for gene synmols that are members of gene pairs in each of the classes specified in the differentially correlated gene pairs input table. Default parameter settings are to take in a result table with HGNC symbols and convert them to Ensembl symbols for gene ontology testing.
 #' @param superNOVA_res The table of differential correlations outputted from superNOVA. Expected to have pValDiff or pValDiff_adj columns as well as zScoreDiff, Gene1, +/- Classes columns.
-#' @param universe Character vector of gene symbols which should be used as the background in the hypergeomtric test. If using this in the context of a DGCA experiment, this gene list most likely should be the gene set post-filtering, but prior to differential correlation analysis.
+#' @param universe Character vector of gene symbols which should be used as the background in the hypergeomtric test. If using this in the context of a superNOVA experiment, this gene list most likely should be the gene set post-filtering, but prior to differential correlation analysis.
 #' @param pval_gene_thresh p-value threshold to call a gene as having significant differential correlation or not.
 #' @param classes Logical indicator specifying whether individual differential correlation gene classes should be extracted from the table or not. If not, compare MUST be set. Default = TRUE
 #' @param compare Names of one or two groups to compare. If set to one group name, compare that group to the global model. If set to two group names, pairwise compare with each other. Default = NULL.
