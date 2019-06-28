@@ -56,7 +56,7 @@ moduleDC <- function(inputMat=inputMat, inputMatB=NULL, design=design, compare=c
       }
       if(!(parallel)){
         chow_res = chowCor(matA = inputMat_tmp, matB=inputMatB, design_mat = design, compare = compare, corrType = corrType)
-        supernova_res = flattenChow(chow_res)
+        supernova_res = flattenChow(chow_res, adjust_q=F,sort_output=F)
       } else {
         outputfile = "tmp_moduleDC.tsv"
         combined = rbind(inputMat_tmp,inputMatB) #temporarily for now
