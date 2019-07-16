@@ -35,7 +35,7 @@ plot_sim_results <- function(exp_vs_obs_table,method="superNOVA",samples="unknow
   roc_0_n = pROC::plot.roc(response,predictor,levels=c("NonSig","0/-"),smooth=F,add=T,col = cbPalette[6])
   roc_n_p = pROC::plot.roc(response,predictor,levels=c("NonSig","-/+"),smooth=F,add=T,col = cbPalette[7])
   roc_n_0 = pROC::plot.roc(response,predictor,levels=c("NonSig","-/0"),smooth=F,add=T,col = cbPalette[8])
-  graphics::legend(0.2,0.5,legend=c("+/0","+/-","0/+","0/-","-/+","-/0"),lty=1,col = cbPalette[3:8],lwd=4)
+  graphics::legend(0.5,0.6,legend=c("+/0","+/-","0/+","0/-","-/+","-/0"),lty=1,col = cbPalette[3:8],lwd=4,y.intersp=0.55)
   return(list(roc_p_0=roc_p_0,
               roc_p_n=roc_p_n,
               roc_0_p=roc_0_p,

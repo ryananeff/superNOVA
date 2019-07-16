@@ -14,7 +14,11 @@
 #' @export
 snMEGENA <- function(data.file,subtype.name,
                      module.pval = 0.05, hub.pval = 0.05, cor.perm=10,
-                     hub.perm=50, annot.table=TRUE, n.cores=1){
+                     hub.perm=50, n.cores=1){
+
+  annot.table = NULL
+  id.col = 1
+  symbol.col= 2
 
   wkdir = getwd()
 
@@ -26,12 +30,15 @@ snMEGENA <- function(data.file,subtype.name,
   # load input data
   ijw = read.csv(data.file,header = TRUE,sep="\t") #output from hybridCorMat
 
+  dir.create(out.dir)
+  setwd(out.dir)
+
   if (doPar & getDoParWorkers() == 1) #create parallel worker backend
   {
     cl <- parallel::makeCluster(n.cores)
     doParallel::registerDoParallel(cl)
     # check how many workers are there
-    cat(paste("number of cores to use:",doParallel::getDoParWorkers(),"\n",sep = "")); flush.console()
+    cat(paste("number of cores to use:",foreach::getDoParWorkers(),"\n",sep = "")); flush.console()
   }
 
   el <- MEGENA::calculate.PFN(ijw,doPar = doPar,num.cores = n.cores,keep.track = TRUE)
@@ -52,20 +59,16 @@ snMEGENA <- function(data.file,subtype.name,
   summary.output <- MEGENA::MEGENA.ModuleSummary(MEGENA.output,
                                          mod.pvalue = module.pval,hub.pvalue = hub.pval,
                                          min.size = 10,max.size = vcount(g)/2,
-                                         annot.table = annot.table,id.col = id.col,symbol.col = symbol.col,
+                                         annot.table = annot.table,
+                                         id.col = id.col,
+                                         symbol.col = symbol.col,
                                          output.sig = TRUE)
 
-  if (!is.null(annot.table))
-  {
-    # update annotation to map to gene symbols
-    igraph::V(g)$name <- paste(annot.table[[symbol.col]][match(igraph::V(g)$name,annot.table[[id.col]])],igraph::V(g)$name,sep = "|")
-    summary.output <- output[c("mapped.modules","module.table")]
-    names(summary.output)[1] <- "modules"
-  }
   igraph::write_graph(g,file=paste(out.dir,"/",subtype.name,".graph.graphml",sep=""),format = "graphml")
   igraph::write_graph(g,file=paste(out.dir,"/",subtype.name,".graph.tsv",sep=""),format = "edgelist")
   write.table(el,file=paste(out.dir,"/",subtype.name,".megena_out.tsv",sep=""),sep="\t")
   MEGENA::output.geneSet.file(summary.output$modules,paste(out.dir,"/",subtype.name,".multiscale_significant.modules.txt",sep=""))
   summary.table <- summary.output$module.table
   write.table(summary.table,file = paste(out.dir,"/",subtype.name,".module_summary.txt",sep=""),sep = "\t",row.names = F,col.names = T,quote = F)
+  setwd(wkdir)
 }
