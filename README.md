@@ -6,12 +6,12 @@ SuperNOVA is a tool to determine whether two genes are better represented by a g
 
 #### Install
 
-```{R}
+```R
 devtools::install_github("ryananeff/superNOVA")
 ```
 
 #### Load 
-```{R}
+```R
 library("superNOVA")
 ```
 
