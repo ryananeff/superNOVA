@@ -1,4 +1,4 @@
-devtools::install_github("ryananeff/superNOVA",auth_token = "c47d0a6ec3cdec2c34d68c3260646dd78f8f1fc3")
+devtools::install_github("ryananeff/superNOVA")
 
 rm(list = ls(all.names = TRUE))
 set.seed(12345)
