@@ -24,3 +24,5 @@ Help can be found in the documentation for each function within R by typing in `
 Ryan Neff at the Bin Zhang lab, Icahn School of Medicine at Mount Sinai.
 
 Special thanks to: Andy McKenzie, Kevin Bu, Bin Zhang, Alice Wang, and everyone at the Zhang lab who has supported this project and given invaluable feedback.
+
+Updated 7/16/2019
