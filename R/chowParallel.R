@@ -127,7 +127,8 @@ chowParallel <- function(inputMat, design, outputFile, compare=NULL,
 			for(i in err){
 				job_retries[i] = job_retries[i] + 1
 				message(paste0("Found error in job ",i,", restarting, retry attempt ",job_retries[i]))
-				print(batchtools::getErrorMessages(i))
+				tryCatch({ print(batchtools::getErrorMessages(i)) }, 
+					 error=function(e){ message("WARN: Couldn't get error message") })
 				batchtools::submitJobs(i,resources=res)
 			}
 		}
@@ -139,7 +140,8 @@ chowParallel <- function(inputMat, design, outputFile, compare=NULL,
 				res_job$memory = round(res$memory*(1.25**job_retries[i]))
 				res_job$walltime = round(res$walltime*(1.25**job_retries[i]))
 				res_job$cores = round(res$cores*(1.25**job_retries[i]))
-				print(batchtools::getLog(i))
+				tryCatch({ print(batchtools::getLog(i)) },
+					 error=function(e){ message("WARN: Couldn't get logfile for job") })
 				batchtools::submitJobs(i,resources=res_job)
 			}
 		}
