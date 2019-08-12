@@ -17,10 +17,12 @@ hybridCorMat <- function(input_file, output_file_prefix, diffCor_cutoff = 0.05, 
   need_subtypes = TRUE
   subtype_files  = c()
   sheader = NULL
+  line_num = 0
   while(continue){
     buffer = readLines(con=fp,n=bufflen,ok=TRUE)
     if(length(buffer)!=bufflen) { continue=FALSE }
     for (line in buffer){
+      line_num = line_num + 1
       splitline = unlist(strsplit(trimws(line), '\t'))
 
       if(header){ #to ignore the header line
@@ -43,6 +45,11 @@ hybridCorMat <- function(input_file, output_file_prefix, diffCor_cutoff = 0.05, 
           subtype_files[[ix]] = con
         }
         need_subtypes = FALSE
+      }
+
+      if(length(splitline)!= length(sheader)){
+          message(paste0("WARN: [line ",line_num, "] Number of fields in line not equal to header"))
+          next
       }
 
       row = splitline[sheader[["Gene1"]]]
