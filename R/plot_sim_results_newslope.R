@@ -5,9 +5,10 @@
 #' @param samples The number of samples that were analyzed to generate the results.
 #' @param output Should a file with the ROC curve be written?
 #' @return The ROC curves for all 6 differentially coexpressed classes (excludes null classes).
+#' @importFrom pROC plot.roc
 #' @keywords superNOVA simulate plot slope
 #' @export
-plot_results_newslope <- function(exp_vs_obs_table,method="superNOVA",samples="unknown", output = ){
+plot_results_newslope <- function(exp_vs_obs_table,method="superNOVA",samples="unknown", output = TRUE){
     response = apply(X=exp_vs_obs_table, MARGIN=1, FUN=function(x){if(x["true_signif"]){x["true_class"]}else{"NonSig"}})
     predictor = as.numeric(exp_vs_obs_table$pvalue)
 

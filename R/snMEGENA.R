@@ -6,7 +6,6 @@
 #' @param hub.pval Connectivity significance p-value based random tetrahedral networks. Recommended is 0.05 (default).
 #' @param cor.perm Number of permutations for calculating FDRs for all correlation pairs. Default is 10.
 #' @param hub.perm Number of permutations for calculating connectivity significance p-value. Default is 50.
-#' @param annot.table Should we create an annotation table for the output? Default = TRUE.
 #' @param n.cores Number of cores to use with MEGENA. Default is 1 (single-threaded).
 #' @return None (output to files)
 #' @keywords superNOVA MEGENA hybrid

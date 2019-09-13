@@ -10,9 +10,22 @@ Imports:
   data.table (>= 1.11.2), 
   doParallel (>= 1.0.14), 
   qvalue (>= 2.10.0),
-  mvtnorm (<= 1.0.8)
+  mvtnorm (>= 1.0.8), 
+  AnnotationDbi,
+  GOstats,
+  HGNChelper,
+  MEGENA,
+  cowplot (>= 0.9.4),
+  foreach (>= 1.4.0),
+  ggplot2,
+  igraph (>= 1.2.0),
+  plotrix,
+  progress (>= 1.2.2), 
+  methods, 
+  ggrepel, 
+  pROC (>= 1.12.1), 
+  matrixStats
 Suggests:
-  pROC (>= 1.12.1),
   grDevices,
   graphics
 License: file LICENSE

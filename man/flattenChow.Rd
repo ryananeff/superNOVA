@@ -4,10 +4,14 @@
 \alias{flattenChow}
 \title{Convert the output from superNOVA chowCor to an annotated edgelist, suitable for writing out to a .tsv file.}
 \usage{
-flattenChow(chow_result)
+flattenChow(chow_result, adjust_q = T, sort_output = T)
 }
 \arguments{
 \item{chow_result}{A list of matrices as output by chowCor. Required}
+
+\item{adjust_q}{Should the q-values be calculated? Otherwise, qValDiff will be the same as pValDiff}
+
+\item{sort_output}{Should the final output be sorted from smallest to largest p-values?}
 }
 \value{
 Returns a data.frame, sorted by superNOVA p-value, where each row is a feature pair, with columns "Gene1","Gene2","groupCor","groupCorPval","globalCor","globalCorP","pValDiff","Classes".

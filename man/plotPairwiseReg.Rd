@@ -4,7 +4,8 @@
 \alias{plotPairwiseReg}
 \title{Plot multiple linear regressions for each subgroup for a pair of genes.}
 \usage{
-plotPairwiseReg(geneA, geneB, datExpr, design_mat)
+plotPairwiseReg(geneA, geneB, datExpr, design_mat,
+  legend_pos = "topleft", title = "Regression models")
 }
 \arguments{
 \item{geneA}{The first gene to plot.}
@@ -14,6 +15,10 @@ plotPairwiseReg(geneA, geneB, datExpr, design_mat)
 \item{datExpr}{A gene expression matrix (gene rows by sample columns).}
 
 \item{design_mat}{A model matrix (sample rows by group columns) with 0 or 1 denoting membership in the group.}
+
+\item{legend_pos}{The position of the legend on the plot. Default = "topleft".}
+
+\item{title}{The title of the plot. Default = "Regression models"}
 }
 \value{
 A plot of geneA vs geneB expression with subgroup correlations highlighted.

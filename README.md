@@ -107,3 +107,10 @@ After you have confirmed the inputs match the required inputs as per the documen
 Ryan Neff at the Bin Zhang lab, Icahn School of Medicine at Mount Sinai. 
 
 Special thanks to: Andy McKenzie, Kevin Bu, Bin Zhang, Alice Wang, and everyone at the Zhang lab who has supported this project and given invaluable feedback.
+
+### News
+
+*9/13/2019:* Note that due to a bug in the R batchtools package currently, please either run this tool in a background thread (non-interactively) or, if you are running it interactively with screen, to detach the screen before it gets to the "Submitting..." progress bar and not reattach. If you are running it interactively outside of screen, do not resize the terminal window at all while it says "Submitting..." or "Waiting...". This is due to a bug in the progress bar which causes the batchtools package to crash unexpectedly as shown in the Github issue link above.
+
+To mitigate this issue (which disables the progress bar completely), add this to the top of your R file: 
+`options(batchtools.progress = FALSE)`

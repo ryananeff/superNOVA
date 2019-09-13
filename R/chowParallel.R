@@ -28,7 +28,7 @@
 chowParallel <- function(inputMat, design, outputFile, compare=NULL,
     sigOutput = FALSE, sigThresh = 0.05, verbose = FALSE, corrType="pearson",
 	perBatch = 10, coresPerJob = 2, timePerJob = 60, memPerJob = 2000,
-	batchConfig = system.file("config/batchConfig_Zhang.R",package="superNOVA"), batchDir = "batchRegistry",
+	batchConfig = system.file("config/batchConfig_Local.R",package="superNOVA"), batchDir = "batchRegistry",
 	batchWarningLevel = 0, batchSeed = 12345, maxRetries = 3, testJob=FALSE,chunkSize=1){
 
 	#######
@@ -127,7 +127,7 @@ chowParallel <- function(inputMat, design, outputFile, compare=NULL,
 			for(i in err){
 				job_retries[i] = job_retries[i] + 1
 				message(paste0("Found error in job ",i,", restarting, retry attempt ",job_retries[i]))
-				tryCatch({ print(batchtools::getErrorMessages(i)) }, 
+				tryCatch({ print(batchtools::getErrorMessages(i)) },
 					 error=function(e){ message("WARN: Couldn't get error message") })
 				batchtools::submitJobs(i,resources=res)
 			}

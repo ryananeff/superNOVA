@@ -1,11 +1,22 @@
+#' @title GO Volcano Plots
+#' @description Plot a volcano-style plot for the differential coexpression inside a gene module (from moduleDC). This should take in the SuperNOVA moduleDC results file and the DEG file as input.
+#' @param supergo_file Output file from moduleDC.
+#' @param diffexp_file Output file from limma topTable().
+#' @param gene_cutoff SuperNOVA moduleDC gene significance level for plotting.
+#' @param pathway_cutoff SuperNOVA moduleDC module significance level for plotting.
+#' @param num_plots The number of top differentially coexpressed modules to plot and save to disk.
+#' @param num_genes The number of top differentially coexpressed genes within a module to label on the plot.
+#' @param prefix The prefix to put before the filename.
+#' @param plt_size The number of inches on each side of the plot.
+#' @return A volcano plot of the differentially coexpressed genes with DEG information within the gene module.
+#' @import ggplot2 ggrepel graphics stats
+#' @export
 plotGOVolcano <- function(supergo_file, diffexp_file, gene_cutoff = 0.05, pathway_cutoff = 0.05,
                           num_plots=10,num_genes=20,
                           prefix="plotGO_",plt_size=5){
 
   options(stringsAsFactors = F)
   options(warn = 0)
-  library("ggplot2")
-  library("ggrepel")
 
   diffexp = read.table(diffexp_file,header = T,sep="\t")
   rownames(diffexp) = make.names(diffexp[,1],unique = T) #gene names should be in the first column and should be unique

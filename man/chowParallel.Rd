@@ -8,7 +8,7 @@ chowParallel(inputMat, design, outputFile, compare = NULL,
   sigOutput = FALSE, sigThresh = 0.05, verbose = FALSE,
   corrType = "pearson", perBatch = 10, coresPerJob = 2,
   timePerJob = 60, memPerJob = 2000,
-  batchConfig = system.file("config/batchConfig_Zhang.R", package =
+  batchConfig = system.file("config/batchConfig_Local.R", package =
   "superNOVA"), batchDir = "batchRegistry", batchWarningLevel = 0,
   batchSeed = 12345, maxRetries = 3, testJob = FALSE,
   chunkSize = 1)

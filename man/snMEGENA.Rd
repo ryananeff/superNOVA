@@ -5,7 +5,7 @@
 \title{SuperNOVA subgroup-specific hybrid MEGENA networks}
 \usage{
 snMEGENA(data.file, subtype.name, module.pval = 0.05, hub.pval = 0.05,
-  cor.perm = 10, hub.perm = 50, annot.table = TRUE, n.cores = 1)
+  cor.perm = 10, hub.perm = 50, n.cores = 1)
 }
 \arguments{
 \item{data.file}{Path to the hybrid correlation matrix.}
@@ -20,9 +20,9 @@ snMEGENA(data.file, subtype.name, module.pval = 0.05, hub.pval = 0.05,
 
 \item{hub.perm}{Number of permutations for calculating connectivity significance p-value. Default is 50.}
 
-\item{annot.table}{Should we create an annotation table for the output? Default = TRUE.}
-
 \item{n.cores}{Number of cores to use with MEGENA. Default is 1 (single-threaded).}
+
+\item{annot.table}{Should we create an annotation table for the output? Default = TRUE.}
 }
 \value{
 None (output to files)

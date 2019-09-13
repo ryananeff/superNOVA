@@ -12,9 +12,6 @@ plot_results_3gr <- function(exp_vs_obs_table,method="unknown",samples="unknown"
   response = apply(X=exp_vs_obs_table, MARGIN=1, FUN=function(x){if(x["true_signif"]){x["true_class"]}else{"NonSig"}})
   predictor = as.numeric(exp_vs_obs_table$pValDiff)
 
-  response_out <<- response
-  predictor_out <<- predictor
-
   order_factor = unique(response)
   response = factor(response, ordered=T,levels=order_factor)
 
