@@ -21,7 +21,12 @@ SuperNOVA is the first differential correlation tool that can accurately identif
 ### Install 
 
 ```R
+#local installs
 devtools::install_github("ryananeff/superNOVA")
+
+#HPC shared library install instructions
+lib_paths = c("/path_to_your/.Rlib",.libPaths())
+withr::with_libpaths(lib_paths, devtools::install_github("ryananeff/superNOVA"))
 ```
 
 ### Load superNOVA
