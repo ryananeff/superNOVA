@@ -84,7 +84,7 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
     varsA = apply(matA,1,function(x){var(x)})
     varsB = apply(matB,1,function(x){var(x)})
 
-    pb <- progress_bar$new(
+    pb <- progress::progress_bar$new(
       format = " [chowCor] [:bar] :current/:total (:percent) eta: :eta gene: :what",
       clear = FALSE, total = nrow(matA), width = 100)
 
@@ -107,9 +107,9 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
         covsAB = cov(t(matAig),t(matBg))
 
         if(corrType=="bicor"){
-        corrs = WGCNA::bicor(t(matAig),t(matBg),use="all.obs")
+        corrs = WGCNA::bicor(t(matAig),t(matBg),use="pairwise.complete.obs")
         } else {
-        corrs = WGCNA::cor(t(matAig),t(matBg),use="all.obs",method=corrType) #get Pearson rho, using Cpp fxn from WGCNA
+        corrs = WGCNA::cor(t(matAig),t(matBg),,use="pairwise.complete.obs",method=corrType) #get Pearson rho, using Cpp fxn from WGCNA
         }
 
         slopes = corrs * (varB / varA[1])
@@ -132,9 +132,9 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
       varB = varsB
       covsAB = cov(t(matAi),t(matB))
       if(corrType=="bicor"){
-        corrs = WGCNA::bicor(t(matAi),t(matB),use="all.obs")
+        corrs = WGCNA::bicor(t(matAi),t(matB),,use="pairwise.complete.obs")
       } else {
-        corrs = WGCNA::cor(t(matAi),t(matB),use="all.obs",method=corrType)
+        corrs = WGCNA::cor(t(matAi),t(matB),,use="pairwise.complete.obs",method=corrType)
       }
 
       slopes = corrs * (varB / varA[1])
@@ -220,7 +220,7 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
     varsA = apply(matA,1,function(x){var(x)})
     varsB = varsA
 
-    pb <- progress_bar$new(
+    pb <- progress::progress_bar$new(
       format = " [chowCor] [:bar] :current/:total (:percent) eta: :eta gene: :what",
       clear = FALSE, total = nrow(matA), width = 100)
 
@@ -243,9 +243,9 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
         covsAB = cov(t(matAig),t(matBg))
 
         if(corrType=="bicor"){
-        corrs = WGCNA::bicor(t(matAig),t(matBg),use="all.obs")
+        corrs = WGCNA::bicor(t(matAig),t(matBg),,use="pairwise.complete.obs")
         } else {
-        corrs = WGCNA::cor(t(matAig),t(matBg),use="all.obs",method=corrType) #get Pearson rho, using Cpp fxn from WGCNA
+        corrs = WGCNA::cor(t(matAig),t(matBg),,use="pairwise.complete.obs",method=corrType) #get Pearson rho, using Cpp fxn from WGCNA
         }
 
         slopes = corrs * (varB / varA[1])
@@ -257,7 +257,11 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
         corrs_rg[groupn,] = corrs
         pvals_rg[groupn,] = pvals
         slopes_rg[groupn,] = slopes
-        classes_rg[groupn,] = sapply(1:length(corrs),function(x){if((pvals[x]<0.05)&(corrs[x]>0)){"+"}else if((pvals[x]<0.05)&(corrs[x]<0)){"-"}else{"0"}})
+        corrs[is.na(corrs)] = 0 #if NA, ignore
+        pvals[is.na(pvals)] = 1 #if NA, ignore
+        classes_rg[groupn,] = sapply(1:length(corrs),
+                                     function(x){if(
+                                       (pvals[x]<0.05)&(corrs[x]>0)){"+"} else if ((pvals[x]<0.05)&(corrs[x]<0)) {"-"} else{"0"}})
         sse_groups = sse_groups + (varB-covsAB*(corrs/sqrt(varA%*%(1/varB))))*(ncol(matBg)-1)
       } #end group
       matAi = matA[ix_row,,drop=FALSE] #get row for matA
@@ -267,9 +271,9 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
       varB = varsB[ix_row:nrow(matB)]
       covsAB = cov(t(matAi),t(matBi))
       if(corrType=="bicor"){
-        corrs = WGCNA::bicor(t(matAi),t(matBi),use="all.obs")
+        corrs = WGCNA::bicor(t(matAi),t(matBi),,use="pairwise.complete.obs")
       } else {
-        corrs = WGCNA::cor(t(matAi),t(matBi),use="all.obs",method=corrType)
+        corrs = WGCNA::cor(t(matAi),t(matBi),,use="pairwise.complete.obs",method=corrType)
       }
 
       slopes = corrs * (varB / varA[1])

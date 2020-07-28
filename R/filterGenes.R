@@ -49,7 +49,7 @@ filterGenes <- function(inputMat, filterTypes = "central",
       if(filterCentralType == "median"){
         row_central = matrixStats::rowMedians(data.matrix(inputMat))
       }
-      row_central_cutoff = stats::quantile(row_central, filterCentralPercentile)
+      row_central_cutoff = stats::quantile(row_central, filterCentralPercentile,na.rm=T)
       rows_above_central = row_central > row_central_cutoff
     }
 
@@ -75,7 +75,7 @@ filterGenes <- function(inputMat, filterTypes = "central",
       if(filterDispersionType == "variance"){
         row_dispersion = row_vars
       }
-      row_dispersion_cutoff = stats::quantile(row_dispersion, filterDispersionPercentile)
+      row_dispersion_cutoff = stats::quantile(row_dispersion, filterDispersionPercentile,na.rm=T)
       rows_above_dispersion = row_dispersion > row_dispersion_cutoff
     }
 
@@ -106,7 +106,7 @@ filterGenes <- function(inputMat, filterTypes = "central",
         if(filterCentralType == "median"){
           row_central = matrixStats::rowMedians(data.matrix(groupList[[i]]))
         }
-        row_central_cutoff = stats::quantile(row_central, filterCentralPercentile)
+        row_central_cutoff = stats::quantile(row_central, filterCentralPercentile,na.rm=T)
         rows_above_central = row_central > row_central_cutoff
       }
 
@@ -132,7 +132,7 @@ filterGenes <- function(inputMat, filterTypes = "central",
         if(filterDispersionType == "variance"){
           row_dispersion = row_vars
         }
-        row_dispersion_cutoff = stats::quantile(row_dispersion, filterDispersionPercentile)
+        row_dispersion_cutoff = stats::quantile(row_dispersion, filterDispersionPercentile,na.rm=T)
         rows_above_dispersion = row_dispersion > row_dispersion_cutoff
       }
 
