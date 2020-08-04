@@ -10,7 +10,7 @@
 #' @importFrom stats cov na.omit pf pt var
 #' @importFrom progress progress_bar
 #' @export
-chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
+chowCorGroup = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
 
   if(!is.null(matB)){secondMat=TRUE} else {secondMat=FALSE; matB = matA}
   if(!is.null(compare)){
@@ -67,6 +67,7 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
 
     varsA_group = matrix(NA,nrow=ncol(design_mat),ncol=nrow(matA))
     varsB_group = matrix(NA,nrow=ncol(design_mat),ncol=nrow(matB))
+    covs_group = array(NA,c(ncol(design_mat),nrow(matA),nrow(matB)))
 
 
     for(groupn in 1:ncol(design_mat)){
@@ -105,6 +106,7 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
         varA = varsA_group[groupn,ix_row,drop=FALSE]
         varB = varsB_group[groupn,,drop=FALSE]
         covsAB = cov(t(matAig),t(matBg))
+        covs_group[groupn,ix_row,] = covsAB
 
         if(corrType=="bicor"){
         corrs = WGCNA::bicor(t(matAig),t(matBg),use="pairwise.complete.obs")
@@ -145,13 +147,37 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
       corr_pvals = 2 * (1 - pt(in_pt, deg_freedom))
 
       #chow test
-      sse_all = (varB-covsAB*(corrs/sqrt(varA%*%(1/varB))))*(ncol(matB)-1)
+      #Chow test
+      sse_all = array(0,nrow(matB))
+      num_compare = 0
+      num_groups = ncol(design_mat)
+      for(group_A in 1:ncol(design_mat)){
+        n_A = sum(design_mat[,group_A])
+        var_xA = varsA_group[group_A,ix_row,drop=FALSE][1]
+        var_yA = array(varsB_group[group_A,,drop=FALSE])
+        cov_A = array(covs_group[group_A,ix_row,,drop=FALSE])
+        if ((group_A+1)<=ncol(design_mat)){
+          for(group_B in (group_A+1):ncol(design_mat)){
+            n_B = sum(design_mat[,group_B])
+            var_xB = varsA_group[group_B,ix_row,drop=FALSE][1]
+            var_yB = array(varsB_group[group_B,,drop=FALSE])
+            cov_B = array(covs_group[group_B,ix_row,,drop=FALSE])
+            sse_ab = n_A*(var_yA-2*cov_B/var_xB*cov_A + cov_B^2/var_xB^2 * var_xA)
+            sse_ba = n_B*(var_yB-2*cov_A/var_xA * cov_B + cov_A^2/var_xA^2 * var_xB)
+            sse_all = sse_all + (sse_ab+sse_ba)
+            num_compare = num_compare + 2
+          }
+        }
+      }
+      
+      sse_all = t(sse_all) / (num_compare/num_groups)
+      #print(sse_all)
       k = 2 #this is equivalent to the number of params for a linear relationship (y=mx+b)
       ngr <- ncol(design_mat) #number of groups
       nsamp <- nrow(design_mat) #number of samples
-      f <- ((sse_all-sse_groups)/(k+1))/(sse_groups/(nsamp-ngr*(k+1)))
-      p <- pf(f, k, nsamp-ngr*k, lower.tail=FALSE)
-
+      f <- ((sse_all-sse_groups)/(num_compare/(ngr)*(k+1)))/(sse_groups/(nsamp-ngr*(k+1)))
+      p <- pf(f, num_compare/(ngr)*k, nsamp-ngr*k, lower.tail=FALSE)
+      
       corrs_mat[ix_row,] = apply(t(corrs_rg),1,paste,collapse="/")
       slopes_mat[ix_row,] = apply(t(slopes_rg),1,paste,collapse="/")
       pvals_mat[ix_row,] = apply(t(pvals_rg),1,paste,collapse="/")
@@ -202,6 +228,7 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
     colnames(classes_mat) = rownames(matB) #gene2 names
 
     varsA_group = matrix(NA,nrow=ncol(design_mat),ncol=nrow(matA))
+    covs_group = array(NA,c(ncol(design_mat),nrow(matA),nrow(matA)))
     varsB_group = varsA_group
 
     for(groupn in 1:ncol(design_mat)){ #for each group in the design matrix
@@ -234,6 +261,7 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
       slopes_rg = matrix(NA,nrow=ncol(design_mat),ncol=(nrow(matB)-ix_row+1))
       pvals_rg = matrix(NA,nrow=ncol(design_mat),ncol=(nrow(matB)-ix_row+1))
       classes_rg = matrix(NA,nrow=ncol(design_mat),ncol=(nrow(matB)-ix_row+1))
+      
       for(groupn in 1:ncol(design_mat)){
         #calculate stats for row
         matAig = matA[ix_row,design_mat[,groupn]==1,drop=FALSE] #get row for matA
@@ -242,6 +270,7 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
         varA = varsA_group[groupn,ix_row,drop=FALSE]
         varB = varsB_group[groupn,ix_row:nrow(matB),drop=FALSE]
         covsAB = cov(t(matAig),t(matBg))
+        covs_group[groupn,ix_row,ix_row:nrow(matB)] = covsAB
 
         if(corrType=="bicor"){
         corrs = WGCNA::bicor(t(matAig),t(matBg),,use="pairwise.complete.obs")
@@ -285,12 +314,35 @@ chowCor = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson"){
       corr_pvals = 2 * (1 - pt(in_pt, deg_freedom))
 
       #Chow test
-      sse_all = (varB-covsAB*(corrs/sqrt(varA%*%(1/varB))))*(ncol(matB)-1)
+      sse_all = array(0,c(length(ix_row:nrow(matB))))
+      num_compare = 0
+      num_groups = ncol(design_mat)
+      for(group_A in 1:ncol(design_mat)){
+        n_A = sum(design_mat[,group_A])
+        var_xA = varsA_group[group_A,ix_row,drop=FALSE][1]
+        var_yA = array(varsB_group[group_A,ix_row:nrow(matB),drop=FALSE])
+        cov_A = array(covs_group[group_A,ix_row,ix_row:nrow(matB),drop=FALSE])
+        if ((group_A+1)<=ncol(design_mat)){
+          for(group_B in (group_A+1):ncol(design_mat)){
+            n_B = sum(design_mat[,group_B])
+            var_xB = varsA_group[group_B,ix_row,drop=FALSE][1]
+            var_yB = array(varsB_group[group_B,ix_row:nrow(matB),drop=FALSE])
+            cov_B = array(covs_group[group_B,ix_row,ix_row:nrow(matB),drop=FALSE])
+            sse_ab = n_A*(var_yA-2*cov_B/var_xB*cov_A + cov_B^2/var_xB^2 * var_xA)
+            sse_ba = n_B*(var_yB-2*cov_A/var_xA * cov_B + cov_A^2/var_xA^2 * var_xB)
+            sse_all = sse_all + (sse_ab+sse_ba)
+            num_compare = num_compare + 2
+          }
+        }
+      }
+          
+      sse_all = t(sse_all) / (num_compare/num_groups)
+      #print(sse_all)
       k = 2 #this is equivalent to the number of params for a linear relationship (y=mx+b)
       ngr <- ncol(design_mat) #number of groups
       nsamp <- nrow(design_mat) #number of samples
-      f <- ((sse_all-sse_groups)/(k+1))/(sse_groups/(nsamp-ngr*(k+1)))
-      p <- pf(f, k, nsamp-ngr*k, lower.tail=FALSE)
+      f <- ((sse_all-sse_groups)/(num_compare/(num_groups+1)*(k+1)))/(sse_groups/(nsamp-ngr*(k+1)))
+      p <- pf(f, num_compare/num_groups*k, nsamp-ngr*k, lower.tail=FALSE)
 
       corrs_mat[ix_row,ix_row:nrow(matB)] = apply(t(corrs_rg),1,paste,collapse="/")
       slopes_mat[ix_row,ix_row:nrow(matB)] = apply(t(slopes_rg),1,paste,collapse="/")

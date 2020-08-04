@@ -9,9 +9,10 @@
 #' @export
 analyse_sim_results <- function(ddcor_res,true_pairs,sig_cutoff=0.05,verbose=F){
 
-  ddcor_res["is_signif"] = apply(ddcor_res,1,function(x){if(as.numeric(x["pValDiff"])<=sig_cutoff){T}else{F}})
+  ddcor_res["is_signif"] = apply(ddcor_res,1,function(x){if(as.numeric(x["pValDiff_adj"])<=sig_cutoff){T}else{F}})
+  ddcor_res[ddcor_res["is_signif"]==F,"Classes"] = "NonSig"
 
-  ddcor_res_signif = ddcor_res[((ddcor_res["Classes"]!="NonSig")&(ddcor_res["is_signif"])),]
+  ddcor_res_signif = ddcor_res[ddcor_res["is_signif"]==T,]
   true_pairs_signif = true_pairs[true_pairs["true_signif"]==TRUE,]
 
   ddcor_res_nonsignif = ddcor_res[(ddcor_res["is_signif"]==F),]

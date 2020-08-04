@@ -6,14 +6,14 @@
 #' @return Returns a data.frame, sorted by superNOVA p-value, where each row is a feature pair, with columns "Gene1","Gene2","groupCor","groupCorPval","globalCor","globalCorP","pValDiff","Classes".
 #' @keywords superNOVA
 #' @export
-flattenChow = function(chow_result, adjust_q=T, sort_output=T){
+flattenChow = function(chow_result, method="BH", sort_output=T){
   rownames = rownames(chow_result$corrs)
   colnames = colnames(chow_result$corrs)
   corrsflat = cbind(which(!is.na(chow_result$corrs),arr.ind = TRUE),na.omit(as.vector(chow_result$corrs)))
   corrsflat[,1] = sapply(corrsflat[,1],function(x){rownames[as.numeric(x)]})
   corrsflat[,2] = sapply(corrsflat[,2],function(x){colnames[as.numeric(x)]})
   columns = c("Gene1","Gene2","groupCor","groupSlope","groupCorPval", #1-5
-              "globalCor","globalSlope","globalCorP","pValDiff","qValDiff", #6-10
+              "globalCor","globalSlope","globalCorP","pValDiff","pValDiff_adj", #6-10
               "Classes","group_order") #11-12
   output = data.frame(matrix(NA,nrow=nrow(corrsflat),ncol=length(columns)))
   output[,1:3] = corrsflat
@@ -23,11 +23,14 @@ flattenChow = function(chow_result, adjust_q=T, sort_output=T){
   output[,7] = na.omit(as.vector(chow_result$globalSlope))
   output[,8] = na.omit(as.vector(chow_result$globalCorP))
   output[,9] = as.numeric(na.omit(as.vector(chow_result$pvalues)))
-  if (adjust_q){
+  if (method=="qvalue"){
     output[,10] = as.matrix(getQValue(output[,9])$qvalues)
   }
-  else {
+  else if (method=="none"){
     output[,10] = output[,9]
+  }
+  else {
+    output[,10] = p.adjust(output[,9],method=method)
   }
   output[,11] = na.omit(as.vector(chow_result$classes))
   output[,12] = rep(chow_result$groups_compared)

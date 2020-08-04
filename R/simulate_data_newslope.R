@@ -37,8 +37,8 @@ simulate_data_newslope <- function(samples_per_group,total_genes,
   #the second gene in all of the gene pairs
   pos_corg1 = WGCNA::simulateModule(eigengeneg1,genes_per_group,nNearGenes=0,minCor=minCor_true,maxCor=maxCor_true,corPower=1,signed=T,geneMeans=NULL) #module is positively correlated
   neg_corg1 = WGCNA::simulateModule(eigengeneg1,genes_per_group,nNearGenes=0,minCor=minCor_true,maxCor=maxCor_true,corPower=1,signed=F,geneMeans=NULL,propNegativeCor = 1) #module is negatively correlated
-  null_corg1a = WGCNA::simulateModule(eigengeneg1,genes_per_group/2,nNearGenes=0,minCor=0.01,maxCor=maxCor_null,corPower=1,signed=T,geneMeans=NULL) #no correlation
-  null_corg1b = WGCNA::simulateModule(eigengeneg1,genes_per_group/2,nNearGenes=0,minCor=0.01,maxCor=maxCor_null,corPower=1,signed=F,geneMeans=NULL,propNegativeCor = 1) #no correlation
+  null_corg1a = WGCNA::simulateModule(eigengeneg1,genes_per_group/2,nNearGenes=0,minCor=minCor_true,maxCor=maxCor_true,corPower=1,signed=T,geneMeans=NULL) #no correlation
+  null_corg1b = WGCNA::simulateModule(eigengeneg1,genes_per_group/2,nNearGenes=0,minCor=minCor_true,maxCor=maxCor_true,corPower=1,signed=F,geneMeans=NULL,propNegativeCor = 1) #no correlation
   null_corg1 = cbind(null_corg1a,null_corg1b)
 
   true_posg1 = attributes(pos_corg1)$trueKME
@@ -49,8 +49,8 @@ simulate_data_newslope <- function(samples_per_group,total_genes,
 
   pos_corg2 = WGCNA::simulateModule(eigengeneg2,genes_per_group,nNearGenes=0,minCor=minCor_true,maxCor=maxCor_true,corPower=1,signed=T,geneMeans=NULL) #module is positively correlated
   neg_corg2 = WGCNA::simulateModule(eigengeneg2,genes_per_group,nNearGenes=0,minCor=minCor_true,maxCor=maxCor_true,corPower=1,signed=F,geneMeans=NULL,propNegativeCor = 1) #module is negatively correlated
-  null_corg2a = WGCNA::simulateModule(eigengeneg2,genes_per_group/2,nNearGenes=0,minCor=0.01,maxCor=maxCor_null,corPower=1,signed=T,geneMeans=NULL) #no correlation
-  null_corg2b = WGCNA::simulateModule(eigengeneg2,genes_per_group/2,nNearGenes=0,minCor=0.01,maxCor=maxCor_null,corPower=1,signed=F,geneMeans=NULL,propNegativeCor = 1) #no correlation
+  null_corg2a = WGCNA::simulateModule(eigengeneg2,genes_per_group/2,nNearGenes=0,minCor=minCor_true,maxCor=maxCor_true,corPower=1,signed=T,geneMeans=NULL) #no correlation
+  null_corg2b = WGCNA::simulateModule(eigengeneg2,genes_per_group/2,nNearGenes=0,minCor=minCor_true,maxCor=maxCor_true,corPower=1,signed=F,geneMeans=NULL,propNegativeCor = 1) #no correlation
   null_corg2 = cbind(null_corg2a,null_corg2b)
 
   true_posg2 = attributes(pos_corg2)$trueKME
@@ -62,12 +62,15 @@ simulate_data_newslope <- function(samples_per_group,total_genes,
   order_control = cbind(pos_corg1,pos_corg1,pos_corg1,
                         null_corg1,null_corg1,null_corg1,
                         neg_corg1,neg_corg1,neg_corg1) #samples on rows, genes on columns, so bind columns
+  
+  new_slope = new_slope/old_slope
 
-  order_disease = cbind(pos_corg2,pos_corg2,pos_corg2,
+  order_disease = cbind(pos_corg2*new_slope, pos_corg2*new_slope, pos_corg2*new_slope,
                         null_corg2,null_corg2,null_corg2,
-                        neg_corg2,neg_corg2,neg_corg2) #samples on rows, genes on columns, so bind columns
+                        neg_corg2*new_slope, neg_corg2*new_slope, neg_corg2*new_slope) #samples on rows, genes on columns, so bind columns
 
-  order_disease = order_disease * new_slope #this changes the slope!!
+  #order_disease = order_disease * new_slope #this changes the slope!!
+  #order_disease[]
 
   matB = data.frame(rbind(order_control, order_disease))
   eigengeneg1 = as.matrix(eigengeneg1)
