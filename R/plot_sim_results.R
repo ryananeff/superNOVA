@@ -10,7 +10,7 @@
 plot_sim_results <- function(exp_vs_obs_table,method="superNOVA",samples="unknown",output=T){
 
   response = apply(X=exp_vs_obs_table, MARGIN=1, FUN=function(x){if(x["true_signif"]){x["true_class"]}else{"NonSig"}})
-  predictor = as.numeric(exp_vs_obs_table$pValDiff)
+  predictor = as.numeric(exp_vs_obs_table$pValDiff_adj)
 
   order_factor = unique(response)
   response = factor(response, ordered=T,levels=order_factor)
