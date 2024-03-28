@@ -122,6 +122,8 @@ chowCorGroup = function(design_mat,matA,matB=NULL,compare=NULL,corrType="pearson
         pvals = 2 * (1 - pt(in_pt, deg_freedom))
         corrs_rg[groupn,] = corrs
         pvals_rg[groupn,] = pvals
+        corrs[is.na(corrs)] = 0 #if NA, ignore
+        pvals[is.na(pvals)] = 1 #if NA, ignore
         slopes_rg[groupn,] = slopes
         classes_rg[groupn,] = sapply(1:length(corrs),function(x){if((pvals[x]<0.05)&(corrs[x]>0)){"+"}else if((pvals[x]<0.05)&(corrs[x]<0)){"-"}else{"0"}})
         
