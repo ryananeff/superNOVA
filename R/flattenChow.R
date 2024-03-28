@@ -19,9 +19,15 @@ flattenChow = function(chow_result, method="BH", sort_output=T){
   output[,1:3] = corrsflat
   output[,4] = na.omit(as.vector(chow_result$slopes))
   output[,5] = na.omit(as.vector(chow_result$corrsP))
+  if(rownames(chow_result$globalCor)[1]==colnames(chow_result$globalCor)[1]){
   output[,6] = as.vector(chow_result$globalCor[upper.tri(chow_result$globalCor,diag=TRUE)])
   output[,7] = as.vector(chow_result$globalSlope[upper.tri(chow_result$globalSlope,diag=TRUE)])
   output[,8] = as.vector(chow_result$globalCorP[upper.tri(chow_result$globalCorP,diag=TRUE)])
+  } else {
+  	output[,6] = as.vector(chow_result$globalCor)
+  	output[,7] = as.vector(chow_result$globalSlope)
+  	output[,8] = as.vector(chow_result$globalCorP)
+  }
   output[,9] = as.numeric(na.omit(as.vector(chow_result$pvalues)))
   if (method=="qvalue"){
     output[,10] = as.matrix(getQValue(output[,9])$qvalues)
